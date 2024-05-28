@@ -6,7 +6,9 @@ import 'package:flutter_1/screens/profile_page.dart';
 import 'package:flutter_1/screens/sell_page.dart';
 
 class FirstPage extends StatefulWidget {
-  FirstPage({super.key});
+  final ValueNotifier<bool> isDarkMode;
+
+  FirstPage({super.key, required this.isDarkMode});
 
   @override
   State<FirstPage> createState() => _FirstPageState();
@@ -21,40 +23,48 @@ class _FirstPageState extends State<FirstPage> {
     });
   }
 
-  final List _pages = [
-    Marketplace(),
+  final List<Widget> _pages = [];
 
-    SellPage(),
-
-    ProfilePage()
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _pages.addAll([
+      Marketplace(),
+      SellPage(onSubmit: () {
+        setState(() {
+          _currentPage = 0; // Navigate to Marketplace page
+        });
+      }),
+      ProfilePage(isDarkMode: widget.isDarkMode),
+    ]);
+  }
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return Scaffold(
-      appBar: AppBar(title: Center(child: Image.asset('assets/logo.jpg', fit: BoxFit.cover, height: 50,))),
+      appBar: AppBar(
+        title: Center(
+          child: Image.asset('assets/logo.jpg', fit: BoxFit.cover, height: 50),
+        ),
+      ),
       body: _pages[_currentPage],
-      bottomNavigationBar: BottomNavigationBar (
+      bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentPage,
         onTap: navigateBottomBar,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.shop_2_rounded),
-            label: 'Marketplace'
+            label: 'Marketplace',
           ),
-
           BottomNavigationBarItem(
             icon: Icon(Icons.sell_rounded),
-            label: 'Sell'
+            label: 'Sell',
           ),
-
           BottomNavigationBarItem(
             icon: Icon(Icons.person_2_rounded),
-            label: 'Profile'
+            label: 'Profile',
           ),
-
-        ]
+        ],
       ),
     );
   }
