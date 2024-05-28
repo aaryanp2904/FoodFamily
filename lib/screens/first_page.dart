@@ -1,31 +1,61 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_1/screens/second_screen.dart';
+// ignore_for_file: prefer_const_constructors
 
-class FirstPage extends StatelessWidget {
-  const FirstPage({super.key});
+import 'package:flutter/material.dart';
+import 'package:flutter_1/screens/marketplace.dart';
+import 'package:flutter_1/screens/profile_page.dart';
+import 'package:flutter_1/screens/sell_page.dart';
+
+class FirstPage extends StatefulWidget {
+  FirstPage({super.key});
+
+  @override
+  State<FirstPage> createState() => _FirstPageState();
+}
+
+class _FirstPageState extends State<FirstPage> {
+  int _currentPage = 0;
+
+  void navigateBottomBar(int index) {
+    setState(() {
+      _currentPage = index;
+    });
+  }
+
+  final List _pages = [
+    Marketplace(),
+
+    SellPage(),
+
+    ProfilePage()
+  ];
 
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
-    return MaterialApp(
-      home: Scaffold(
-        backgroundColor: const Color.fromARGB(255, 116, 160, 196),
-        appBar: AppBar(
-          title: Center(child: Text("Best App of All Time", style: TextStyle(color: Colors.white),)),
-          backgroundColor: const Color.fromARGB(255, 0, 87, 157),
-          elevation: 0,
-          leading: Icon(Icons.menu, color: Colors.white,),
-          actions: [IconButton(onPressed: () {}, icon: Icon(Icons.logout, color: Colors.white,))],
-        ),
-        body: Center( 
-          child: ElevatedButton(child: Text("Second page"),
-          onPressed: () => {
-            Navigator.push(context, MaterialPageRoute(builder: (context) => SecondPage()))
-          },),
-        ),
+    return Scaffold(
+      appBar: AppBar(title: Center(child: Image.asset('assets/logo.jpg', fit: BoxFit.cover, height: 50,))),
+      body: _pages[_currentPage],
+      bottomNavigationBar: BottomNavigationBar (
+        currentIndex: _currentPage,
+        onTap: navigateBottomBar,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shop_2_rounded),
+            label: 'Marketplace'
+          ),
+
+          BottomNavigationBarItem(
+            icon: Icon(Icons.sell_rounded),
+            label: 'Sell'
+          ),
+
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_2_rounded),
+            label: 'Profile'
+          ),
+
+        ]
       ),
     );
   }
-
-
 }

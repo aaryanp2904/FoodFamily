@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_1/screens/first_page.dart';
-import 'package:flutter_1/screens/second_screen.dart';
+import 'package:flutter_1/screens/sell_page.dart';
 
 void main() {
   runApp(MyApp());
