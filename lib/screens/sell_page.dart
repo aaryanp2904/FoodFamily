@@ -93,6 +93,7 @@ class _SellPageState extends State<SellPage> {
   void _submitItem() {
     if (_nameController.text.isEmpty || _images.isEmpty || _priceController.text.isEmpty || _expiryDateController.text.isEmpty) {
       // Show an error message or handle the validation as needed
+      showDialog(context: context, builder: (context) => AlertDialog(title: Text('Missing Fields'), content: Text('Make sure to fill out ALL fields, including photo.'),));
       return;
     }
 
@@ -125,7 +126,7 @@ class _SellPageState extends State<SellPage> {
               onPressed: () {
                 _showPicker(context);
               },
-              child: const Text('Upload/Take Photo'),
+              child: const Text('Upload/Take Photo (*)'),
             ),
             const SizedBox(height: 16),
             Wrap(
@@ -141,7 +142,7 @@ class _SellPageState extends State<SellPage> {
               }).toList(),
             ),
             const SizedBox(height: 16),
-            const Text('Item Name'),
+            const Text('Item Name (*)'),
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
@@ -150,7 +151,7 @@ class _SellPageState extends State<SellPage> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text('Price'),
+            const Text('Price (*)'),
             TextField(
               controller: _priceController,
               decoration: InputDecoration(
@@ -164,7 +165,7 @@ class _SellPageState extends State<SellPage> {
               ],
             ),
             const SizedBox(height: 16),
-            const Text('Expiry Date'),
+            const Text('Expiry Date (*)'),
             TextField(
               controller: _expiryDateController,
               decoration: InputDecoration(
