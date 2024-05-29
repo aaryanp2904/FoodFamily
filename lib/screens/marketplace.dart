@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_1/screens/item_detail_page.dart';
 import 'package:provider/provider.dart';
 import '../item_provider.dart';
 
@@ -15,42 +16,46 @@ class Marketplace extends StatelessWidget {
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
-        return Container(
-          padding: const EdgeInsets.all(8),
-          color: Theme.of(context).primaryColor,
-          child: Row(
-            children: [
-              Image.file(
-                item.photos[0],
-                width: screenWidth * 0.4,
-                height: screenWidth * 0.4,
-                fit: BoxFit.cover,
-              ),
-              SizedBox(width: 10), // Add some space between the image and the text
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.name,
-                      style: TextStyle(fontSize: screenWidth * 0.1), // Adjust text size
-                    ),
-                    SizedBox(height: 10), // Add some space between text and row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return GestureDetector(
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => ItemDetailPage(item: item)));
+            },
+            child: Container (
+                    padding: const EdgeInsets.all(8),
+                    color: Theme.of(context).primaryColor,
+                    child: Row(
                       children: [
-                        Text("£${item.price}"),
-                        Text(item.expiryDate),
+                        Image.file(
+                          item.photos[0],
+                          width: screenWidth * 0.4,
+                          height: screenWidth * 0.4,
+                          fit: BoxFit.cover,
+                        ),
+                        const SizedBox(width: 10), // Add some space between the image and the text
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.name,
+                                style: TextStyle(
+                                    fontSize: screenWidth * 0.1), // Adjust text size
+                              ),
+                              const SizedBox(height: 10), // Add some space between text and row
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("£${item.price}"),
+                                  Text(item.expiryDate),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
+                  ));
       },
     );
   }
 }
-

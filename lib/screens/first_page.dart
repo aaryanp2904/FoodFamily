@@ -58,7 +58,7 @@ class _FirstPageState extends State<FirstPage> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.sell_rounded),
-            label: 'Sell',
+            label: 'My Listings',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_2_rounded),
