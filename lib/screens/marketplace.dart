@@ -57,7 +57,7 @@ class Marketplace extends StatelessWidget {
         final item = items[index];
         return Container(
           padding: const EdgeInsets.all(8),
-          color: Colors.white,
+          color: Theme.of(context).primaryColor,
           child: Row(
             children: [
               Image.file(

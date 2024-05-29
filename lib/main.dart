@@ -16,6 +16,18 @@ class MyApp extends StatelessWidget {
   // Create a ValueNotifier to manage the theme state
   final ValueNotifier<bool> _isDarkMode = ValueNotifier(false);
 
+  ThemeData dark = ThemeData(textTheme: Typography.whiteCupertino,
+      brightness: Brightness.dark,
+      useMaterial3: true
+  );
+
+  ThemeData light = ThemeData(
+    primaryColor: Colors.white,
+    textTheme: Typography.blackCupertino,
+    brightness: Brightness.light,
+    useMaterial3: true,
+  );
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -25,7 +37,7 @@ class MyApp extends StatelessWidget {
         builder: (context, isDark, child) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
-            theme: isDark ? ThemeData.dark() : ThemeData.light(),
+            theme: isDark ? dark : light,
             home: FirstPage(isDarkMode: _isDarkMode),
             routes: {
               '/sell': (context) => SellPage(onSubmit: () {
