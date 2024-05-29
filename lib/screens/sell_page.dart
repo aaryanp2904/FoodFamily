@@ -17,22 +17,20 @@ class SellPage extends StatefulWidget {
 }
 
 class _SellPageState extends State<SellPage> {
-  List<File> _images = [];
-  TextEditingController _nameController = TextEditingController();
-  TextEditingController _priceController = TextEditingController();
-  TextEditingController _expiryDateController = TextEditingController();
+  final List<File> _images = [];
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _expiryDateController = TextEditingController();
 
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
 
     if (source == ImageSource.gallery) {
       final pickedFiles = await picker.pickMultiImage();
-      if (pickedFiles != null) {
-        setState(() {
-          _images.addAll(pickedFiles.map((pickedFile) => File(pickedFile.path)).toList());
-        });
-      }
-    } else if (source == ImageSource.camera) {
+      setState(() {
+        _images.addAll(pickedFiles.map((pickedFile) => File(pickedFile.path)).toList());
+      });
+        } else if (source == ImageSource.camera) {
       bool continueTakingPhotos = true;
 
       while (continueTakingPhotos) {
@@ -55,8 +53,8 @@ class _SellPageState extends State<SellPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Continue Taking Photos?'),
-          content: Text('Would you like to take another photo?'),
+          title: const Text('Continue Taking Photos?'),
+          content: const Text('Would you like to take another photo?'),
           actions: [
             TextButton(
               child: Text('No'),
@@ -93,7 +91,7 @@ class _SellPageState extends State<SellPage> {
   void _submitItem() {
     if (_nameController.text.isEmpty || _images.isEmpty || _priceController.text.isEmpty || _expiryDateController.text.isEmpty) {
       // Show an error message or handle the validation as needed
-      showDialog(context: context, builder: (context) => AlertDialog(title: Text('Missing Fields'), content: Text('Make sure to fill out ALL fields, including photo.'),));
+      showDialog(context: context, builder: (context) => const AlertDialog(title: Text('Missing Fields'), content: Text('Make sure to fill out ALL fields, including photo.'),));
       return;
     }
 
@@ -145,7 +143,7 @@ class _SellPageState extends State<SellPage> {
             const Text('Item Name (*)'),
             TextField(
               controller: _nameController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               ),
@@ -154,12 +152,12 @@ class _SellPageState extends State<SellPage> {
             const Text('Price (*)'),
             TextField(
               controller: _priceController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 prefixText: '£',
               ),
-              keyboardType: TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
               ],
@@ -168,7 +166,7 @@ class _SellPageState extends State<SellPage> {
             const Text('Expiry Date (*)'),
             TextField(
               controller: _expiryDateController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 suffixIcon: Icon(Icons.calendar_today),
                 contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -199,16 +197,16 @@ class _SellPageState extends State<SellPage> {
           child: Wrap(
             children: <Widget>[
               ListTile(
-                leading: Icon(Icons.photo_library),
-                title: Text('Photo Library'),
+                leading: const Icon(Icons.photo_library),
+                title: const Text('Photo Library'),
                 onTap: () {
                   _pickImage(ImageSource.gallery);
                   Navigator.of(context).pop();
                 },
               ),
               ListTile(
-                leading: Icon(Icons.photo_camera),
-                title: Text('Camera'),
+                leading: const Icon(Icons.photo_camera),
+                title: const Text('Camera'),
                 onTap: () {
                   _pickImage(ImageSource.camera);
                   Navigator.of(context).pop();
