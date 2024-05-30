@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_1/screens/item_detail_page.dart';
 import 'package:provider/provider.dart';
 import '../item_provider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class Marketplace extends StatelessWidget {
   const Marketplace({super.key});
@@ -12,7 +13,7 @@ class Marketplace extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return ListView.builder(
-      padding: EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 10),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
@@ -25,12 +26,20 @@ class Marketplace extends StatelessWidget {
                     color: Theme.of(context).primaryColor,
                     child: Row(
                       children: [
-                        Image.file(
-                          item.photos[0],
-                          width: screenWidth * 0.4,
-                          height: screenWidth * 0.4,
-                          fit: BoxFit.cover,
-                        ),
+                        if (kIsWeb) 
+                          Image.network(
+                            item.photos[0].path, // assuming item.photos[0].path contains the network URL
+                            width: screenWidth * 0.2,
+                            height: screenWidth * 0.2,
+                            fit: BoxFit.cover,
+                          )
+                        else 
+                          Image.file(
+                            item.photos[0],
+                            width: screenWidth * 0.4,
+                            height: screenWidth * 0.4,
+                            fit: BoxFit.cover,
+                          ),
                         const SizedBox(width: 10), // Add some space between the image and the text
                         Expanded(
                           child: Column(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../item_provider.dart';
 import '../item_model.dart';
 
 class ItemDetailPage extends StatelessWidget {
@@ -24,17 +23,17 @@ class ItemDetailPage extends StatelessWidget {
               height: screenWidth, // Maintain aspect ratio
               fit: BoxFit.cover,
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(
               item.name,
               style: TextStyle(fontSize: screenWidth * 0.05), // Responsive text size
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(
               "£${item.price}",
               style: TextStyle(fontSize: screenWidth * 0.04), // Responsive text size
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Text(
               item.expiryDate,
               style: TextStyle(fontSize: screenWidth * 0.04), // Responsive text size

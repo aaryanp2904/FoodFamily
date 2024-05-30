@@ -9,7 +9,7 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile Page'),
+        title: const Text('Profile Page'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -19,7 +19,7 @@ class ProfilePage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Dark Mode', style: TextStyle(fontSize: 18)),
+                const Text('Dark Mode', style: TextStyle(fontSize: 18)),
                 ValueListenableBuilder(
                   valueListenable: isDarkMode,
                   builder: (context, isDark, child) {
@@ -34,7 +34,7 @@ class ProfilePage extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            Center(child: Text('Profile Page')),
+            const Center(child: Text('Profile Page')),
           ],
         ),
       ),

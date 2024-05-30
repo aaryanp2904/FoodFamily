@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'item_model.dart';
 
 class ItemProvider with ChangeNotifier {
-  List<Item> _items = [];
+  final List<Item> _items = [];
 
   List<Item> get items => _items;
 

@@ -8,7 +8,7 @@ import 'package:flutter_1/screens/sell_page.dart';
 class FirstPage extends StatefulWidget {
   final ValueNotifier<bool> isDarkMode;
 
-  FirstPage({super.key, required this.isDarkMode});
+  const FirstPage({super.key, required this.isDarkMode});
 
   @override
   State<FirstPage> createState() => _FirstPageState();

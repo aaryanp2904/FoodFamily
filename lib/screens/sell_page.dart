@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../item_provider.dart';
 import '../item_model.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class SellPage extends StatefulWidget {
   final VoidCallback onSubmit;
@@ -27,10 +28,12 @@ class _SellPageState extends State<SellPage> {
 
     if (source == ImageSource.gallery) {
       final pickedFiles = await picker.pickMultiImage();
-      setState(() {
-        _images.addAll(pickedFiles.map((pickedFile) => File(pickedFile.path)).toList());
-      });
-        } else if (source == ImageSource.camera) {
+      if (pickedFiles != null) {
+        setState(() {
+          _images.addAll(pickedFiles.map((pickedFile) => File(pickedFile.path)).toList());
+        });
+      }
+    } else if (source == ImageSource.camera) {
       bool continueTakingPhotos = true;
 
       while (continueTakingPhotos) {
@@ -57,13 +60,13 @@ class _SellPageState extends State<SellPage> {
           content: const Text('Would you like to take another photo?'),
           actions: [
             TextButton(
-              child: Text('No'),
+              child: const Text('No'),
               onPressed: () {
                 Navigator.of(context).pop(false);
               },
             ),
             TextButton(
-              child: Text('Yes'),
+              child: const Text('Yes'),
               onPressed: () {
                 Navigator.of(context).pop(true);
               },
@@ -131,12 +134,21 @@ class _SellPageState extends State<SellPage> {
               spacing: 10,
               runSpacing: 10,
               children: _images.map((image) {
-                return Image.file(
-                  image,
-                  width: 50,
-                  height: 50,
-                  fit: BoxFit.cover,
-                );
+                if (kIsWeb) {
+                  return Image.network(
+                    image.path,
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                  );
+                } else {
+                  return Image.file(
+                    image,
+                    width: 50,
+                    height: 50,
+                    fit: BoxFit.cover,
+                  );
+                }
               }).toList(),
             ),
             const SizedBox(height: 16),

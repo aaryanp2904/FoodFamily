@@ -44,7 +44,7 @@ class MyApp extends StatelessWidget {
                     // Navigate to the Marketplace screen
                     Navigator.of(context).pushReplacementNamed('/marketplace');
                   }),
-              '/marketplace': (context) => Marketplace(),
+              '/marketplace': (context) => const Marketplace(),
               '/profile': (context) => ProfilePage(isDarkMode: _isDarkMode),
             },
           );
