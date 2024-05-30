@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_1/screens/marketplace.dart';
 import 'package:flutter_1/screens/profile_page.dart';
+import 'package:flutter_1/screens/list_new_item.dart';
 import 'package:flutter_1/screens/sell_page.dart';
 
 class FirstPage extends StatefulWidget {
