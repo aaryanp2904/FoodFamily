@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'country_flags.dart'; // Import the country flags
 
 class ProfilePage extends StatefulWidget {
   final ValueNotifier<bool> isDarkMode;
@@ -12,8 +13,13 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   String? selectedAccommodation;
+  final TextEditingController _countryCodeController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  String getFlagEmoji(String countryCode) {
+    return countryFlags[countryCode] ?? '';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,26 +76,61 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(height: 16),
               const Text('Phone Number', style: TextStyle(fontSize: 16)),
               const SizedBox(height: 8),
-              TextFormField(
-                controller: _phoneController,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
+              Row(
+                children: [
+                  SizedBox(
+                    width: 80,
+                    child: TextFormField(
+                      controller: _countryCodeController,
+                      decoration: InputDecoration(
+                        prefixIcon: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: Text(
+                            getFlagEmoji(_countryCodeController.text ?? ''),
+                            style: const TextStyle(fontSize: 24),
+                          ),
+                        ),
+                        hintText: 'Code',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 15),
+                      ),
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      onChanged: (value) {
+                        setState(
+                            () {}); // Update the flag emoji when the code changes
+                      },
+                    ),
                   ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                ),
-                keyboardType: TextInputType.phone,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a phone number';
-                  }
-                  if (!RegExp(r'^\+?1?\d{9,15}$').hasMatch(value)) {
-                    return 'Please enter a valid phone number';
-                  }
-                  return null;
-                },
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _phoneController,
+                      decoration: InputDecoration(
+                        hintText: 'Phone Number',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 15),
+                      ),
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a phone number';
+                        }
+                        if (!RegExp(r'^\d{9,15}$').hasMatch(value)) {
+                          return 'Please enter a valid phone number';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               const Text('Accommodation', style: TextStyle(fontSize: 16)),
