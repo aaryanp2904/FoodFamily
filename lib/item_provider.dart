@@ -20,7 +20,7 @@ class ItemProvider with ChangeNotifier {
         final data = doc.data() as Map<String, dynamic>;
         return Item(
           name: data['name'],
-          photos: (data['images'] as List).map((url) => File(url)).toList(),
+          photos: List<String>.from(data['images']),
           price: data['price'],
           expiryDate: data['expiryDate'],
           description: data['description'],

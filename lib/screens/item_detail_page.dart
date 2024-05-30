@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../item_model.dart';
 
@@ -24,7 +23,6 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Display current photo index at the top
             Text(
               'Photo ${_currentPage + 1} of ${widget.item.photos.length}',
               style: TextStyle(
@@ -33,10 +31,9 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
               ),
             ),
             const SizedBox(height: 10),
-            // Display all photos using PageView
             Expanded(
               child: SizedBox(
-                height: screenWidth * 0.8, // Adjust the height as needed
+                height: screenWidth * 0.8,
                 child: PageView.builder(
                   itemCount: widget.item.photos.length,
                   onPageChanged: (int page) {
@@ -45,31 +42,20 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
                     });
                   },
                   itemBuilder: (context, index) {
-                    final photo = widget.item.photos[index];
+                    final photoUrl = widget.item.photos[index];
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: Column(
                         children: [
-                          kIsWeb
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  child: Image.network(
-                                    photo.path,
-                                    width: screenWidth * 0.8,
-                                    height: screenWidth * 0.8,
-                                    fit: BoxFit.cover,
-                                  ),
-                                )
-                              : ClipRRect(
-                                  borderRadius: BorderRadius.circular(8.0),
-                                  child: Image.file(
-                                    photo,
-                                    width: screenWidth * 0.8,
-                                    height: screenWidth *
-                                        0.8, // Maintain aspect ratio
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: Image.network(
+                              photoUrl,
+                              width: screenWidth * 0.8,
+                              height: screenWidth * 0.8,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                           const SizedBox(height: 8),
                         ],
                       ),
@@ -177,9 +163,8 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      Color.fromARGB(255, 43, 173, 199), // Background color
-                  foregroundColor: Colors.white, // Text color
+                  backgroundColor: Color.fromARGB(255, 43, 173, 199),
+                  foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8.0),

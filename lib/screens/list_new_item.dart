@@ -141,9 +141,16 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
         String fileName = DateTime.now().millisecondsSinceEpoch.toString();
         Reference reference = FirebaseStorage.instance.ref().child('items/$fileName');
         UploadTask uploadTask = reference.putFile(image);
-        TaskSnapshot taskSnapshot = await uploadTask;
-        String downloadUrl = await taskSnapshot.ref.getDownloadURL();
-        imageUrls.add(downloadUrl);
+        TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
+        if (taskSnapshot.state == TaskState.success) {
+          String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+          imageUrls.add(downloadUrl);
+          print('Upload successful: $downloadUrl');
+        } else {
+          print('Upload failed');
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to upload image')));
+          return;
+        }
       }
       await FirebaseFirestore.instance.collection('items').add({
         'name': _nameController.text,
@@ -156,7 +163,7 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
 
       Provider.of<ItemProvider>(context, listen: false).addItem(Item(
         name: _nameController.text,
-        photos: _images,
+        photos: imageUrls,
         price: _priceController.text,
         expiryDate: _expiryDateController.text,
         description: _descriptionController.text,

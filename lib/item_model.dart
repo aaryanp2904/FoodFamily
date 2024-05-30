@@ -2,7 +2,7 @@ import 'dart:io';
 
 class Item {
   final String name;
-  final List<File> photos;
+  final List<String> photos;
   final String price;
   final String expiryDate;
   final String description;
@@ -18,7 +18,7 @@ class Item {
   factory Item.fromFirestore(Map<String, dynamic> data) {
     return Item(
       name: data['name'],
-      photos: (data['images'] as List).map((url) => File(url)).toList(),
+      photos: List<String>.from(data['images']),
       price: data['price'],
       expiryDate: data['expiryDate'],
       description: data['description'],
