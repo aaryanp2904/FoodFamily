@@ -13,57 +13,116 @@ class Marketplace extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return ListView.builder(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(10),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
         return GestureDetector(
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => ItemDetailPage(item: item)));
-            },
-            child: Container (
-                    padding: const EdgeInsets.all(8),
-                    color: Theme.of(context).primaryColor,
-                    child: Row(
+          onTap: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => ItemDetailPage(item: item)));
+          },
+          child: Card(
+            margin: const EdgeInsets.symmetric(vertical: 10),
+            elevation: 5,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (kIsWeb)
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 10,
+                            offset: Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: Image.network(
+                          item.photos[0].path,
+                          width: screenWidth * 0.2,
+                          height: screenWidth * 0.2,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    )
+                  else
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 10,
+                            offset: Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(15),
+                        child: Image.file(
+                          item.photos[0],
+                          width: screenWidth * 0.4,
+                          height: screenWidth * 0.4,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  const SizedBox(
+                      width:
+                          10), // Add some space between the image and the text
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (kIsWeb) 
-                          Image.network(
-                            item.photos[0].path, // assuming item.photos[0].path contains the network URL
-                            width: screenWidth * 0.2,
-                            height: screenWidth * 0.2,
-                            fit: BoxFit.cover,
-                          )
-                        else 
-                          Image.file(
-                            item.photos[0],
-                            width: screenWidth * 0.4,
-                            height: screenWidth * 0.4,
-                            fit: BoxFit.cover,
+                        Text(
+                          item.name,
+                          style: TextStyle(
+                            fontSize: screenWidth * 0.05, // Adjust text size
+                            fontWeight: FontWeight.bold,
                           ),
-                        const SizedBox(width: 10), // Add some space between the image and the text
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.name,
-                                style: TextStyle(
-                                    fontSize: screenWidth * 0.1), // Adjust text size
+                        ),
+                        const SizedBox(
+                            height: 5), // Add some space between text and row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "£${item.price}",
+                              style: TextStyle(
+                                fontSize: screenWidth * 0.04,
+                                color: Colors.green,
+                                fontWeight: FontWeight.w500,
                               ),
-                              const SizedBox(height: 10), // Add some space between text and row
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("£${item.price}"),
-                                  Text(item.expiryDate),
-                                ],
+                            ),
+                            Text(
+                              item.expiryDate,
+                              style: TextStyle(
+                                fontSize: screenWidth * 0.035,
+                                color: Colors.grey,
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ));
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
       },
     );
   }
