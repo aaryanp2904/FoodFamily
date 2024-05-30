@@ -25,7 +25,8 @@ class ItemDetailPage extends StatelessWidget {
                     children: [
                       // Display all photos
                       SizedBox(
-                        height: screenWidth, // Adjust the height as needed
+                        height:
+                            screenWidth * 0.8, // Adjust the height as needed
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: item.photos.length,
@@ -33,20 +34,31 @@ class ItemDetailPage extends StatelessWidget {
                             final photo = item.photos[index];
                             return Padding(
                               padding: const EdgeInsets.all(4.0),
-                              child: kIsWeb
-                                  ? Image.network(
-                                      photo.path,
-                                      width: screenWidth * 0.15,
-                                      height: screenWidth * 0.15,
-                                      fit: BoxFit.cover,
-                                    )
-                                  : Image.file(
-                                      photo,
-                                      width: screenWidth,
-                                      height:
-                                          screenWidth, // Maintain aspect ratio
-                                      fit: BoxFit.cover,
+                              child: Column(
+                                children: [
+                                  kIsWeb
+                                      ? Image.network(
+                                          photo.path,
+                                          width: screenWidth * 0.8,
+                                          height: screenWidth * 0.8,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Image.file(
+                                          photo,
+                                          width: screenWidth * 0.8,
+                                          height: screenWidth *
+                                              0.8, // Maintain aspect ratio
+                                          fit: BoxFit.cover,
+                                        ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    'Photo ${index + 1} of ${item.photos.length}',
+                                    style: TextStyle(
+                                      fontSize: screenWidth * 0.035,
                                     ),
+                                  ),
+                                ],
+                              ),
                             );
                           },
                         ),
