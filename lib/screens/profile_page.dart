@@ -90,7 +90,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             style: const TextStyle(fontSize: 24),
                           ),
                         ),
-                        hintText: 'Code',
+                        hintText: '+',
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
