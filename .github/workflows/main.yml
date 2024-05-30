@@ -31,15 +31,6 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Ensure Gradle Wrapper
-      run: ./gradlew wrapper --gradle-version 7.0.2
-
-    - name: Build APK with Debug Logs
-      run: ./gradlew build --debug
-      env:
-        JAVA_HOME: ${{ steps.setup-java.outputs.path }}
-        CI: true
-
     - name: Build APK
       run: flutter build apk --release
       env:
