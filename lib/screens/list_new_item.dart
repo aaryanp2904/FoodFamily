@@ -31,7 +31,8 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
       final pickedFiles = await picker.pickMultiImage();
       if (pickedFiles != null) {
         setState(() {
-          _images.addAll(pickedFiles.map((pickedFile) => File(pickedFile.path)).toList());
+          _images.addAll(
+              pickedFiles.map((pickedFile) => File(pickedFile.path)).toList());
         });
       }
     } else if (source == ImageSource.camera) {
@@ -54,28 +55,29 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
 
   Future<bool> _showContinueTakingPhotosDialog() async {
     return await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Continue Taking Photos?'),
-          content: const Text('Would you like to take another photo?'),
-          actions: [
-            TextButton(
-              child: const Text('No'),
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-            ),
-            TextButton(
-              child: const Text('Yes'),
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-            ),
-          ],
-        );
-      },
-    ) ?? false;
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Continue Taking Photos?'),
+              content: const Text('Would you like to take another photo?'),
+              actions: [
+                TextButton(
+                  child: const Text('No'),
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                ),
+                TextButton(
+                  child: const Text('Yes'),
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                  },
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -87,13 +89,17 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
     );
     if (pickedDate != null) {
       setState(() {
-        _expiryDateController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
+        _expiryDateController.text =
+            DateFormat('yyyy-MM-dd').format(pickedDate);
       });
     }
   }
 
   void _submitItem() {
-    if (_nameController.text.isEmpty || _images.isEmpty || _priceController.text.isEmpty || _expiryDateController.text.isEmpty) {
+    if (_nameController.text.isEmpty ||
+        _images.isEmpty ||
+        _priceController.text.isEmpty ||
+        _expiryDateController.text.isEmpty) {
       // Show an error message or handle the validation as needed
       showDialog(
         context: context,
@@ -106,12 +112,11 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
     }
 
     final item = Item(
-      name: _nameController.text,
-      photos: _images,
-      price: _priceController.text,
-      expiryDate: _expiryDateController.text,
-      description: _descriptionController.text
-    );
+        name: _nameController.text,
+        photos: _images,
+        price: _priceController.text,
+        expiryDate: _expiryDateController.text,
+        description: _descriptionController.text);
 
     Provider.of<ItemProvider>(context, listen: false).addItem(item);
 
@@ -130,92 +135,118 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ElevatedButton(
-              onPressed: () {
-                _showPicker(context);
-              },
-              child: const Text('Upload/Take Photo (*)'),
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: _images.map((image) {
-                if (kIsWeb) {
-                  return Image.network(
-                    image.path,
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ElevatedButton.icon(
+                onPressed: () {
+                  _showPicker(context);
+                },
+                icon: const Icon(Icons.upload_file),
+                label: const Text('Upload/Take Photo (*)'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  textStyle: const TextStyle(fontSize: 16),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: _images.map((image) {
+                  return ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: kIsWeb
+                        ? Image.network(
+                            image.path,
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
+                          )
+                        : Image.file(
+                            image,
+                            width: 80,
+                            height: 80,
+                            fit: BoxFit.cover,
+                          ),
                   );
-                } else {
-                  return Image.file(
-                    image,
-                    width: 50,
-                    height: 50,
-                    fit: BoxFit.cover,
-                  );
-                }
-              }).toList(),
-            ),
-            const SizedBox(height: 16),
-            const Text('Item Name (*)'),
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                }).toList(),
               ),
-            ),
-            const SizedBox(height: 16),
-            const Text('Price (*)'),
-            TextField(
-              controller: _priceController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                prefixText: '£',
+              const SizedBox(height: 16),
+              const Text('Item Name (*)'),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                  hintText: 'Enter item name',
+                ),
               ),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Text('Expiry Date (*)'),
-            TextField(
-              controller: _expiryDateController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.calendar_today),
-                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              const SizedBox(height: 16),
+              const Text('Price (*)'),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _priceController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                  prefixText: '£',
+                  hintText: 'Enter price',
+                ),
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+                ],
               ),
-              onTap: () async {
-                FocusScope.of(context).requestFocus(FocusNode());
-                await _selectDate(context);
-              },
-            ),
-            const SizedBox(height: 16),
-            const Text('Description'),
-            TextField(
-              controller: _descriptionController,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              const SizedBox(height: 16),
+              const Text('Expiry Date (*)'),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _expiryDateController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                  suffixIcon: Icon(Icons.calendar_today),
+                  hintText: 'Select expiry date',
+                ),
+                onTap: () async {
+                  FocusScope.of(context).requestFocus(FocusNode());
+                  await _selectDate(context);
+                },
               ),
-              style: TextStyle(height: 10),
-            ),
-            const SizedBox(height: 16),
-            Center(
-              child: ElevatedButton(
-                onPressed: _submitItem,
-                child: const Text('Submit'),
+              const SizedBox(height: 16),
+              const Text('Description'),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _descriptionController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                  hintText: 'Enter description',
+                ),
+                maxLines: 5,
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _submitItem,
+                  child: const Text('Submit'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16, horizontal: 32),
+                    textStyle: const TextStyle(fontSize: 16),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

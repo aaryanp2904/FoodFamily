@@ -107,7 +107,7 @@ class Marketplace extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              item.expiryDate,
+                              "Expiry: ${item.expiryDate}",
                               style: TextStyle(
                                 fontSize: screenWidth * 0.035,
                                 color: Colors.grey,
