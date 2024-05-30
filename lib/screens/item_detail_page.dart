@@ -33,6 +33,11 @@ class ItemDetailPage extends StatelessWidget {
               "£${item.price}",
               style: TextStyle(fontSize: screenWidth * 0.04), // Responsive text size
             ),
+            const SizedBox(height: 30),
+            Text(
+              item.description,
+              style: TextStyle(fontSize: screenWidth * 0.04), // Responsive text size
+            ),
             const SizedBox(height: 10),
             Text(
               item.expiryDate,

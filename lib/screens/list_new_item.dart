@@ -22,6 +22,7 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _expiryDateController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
 
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
@@ -109,9 +110,12 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
       photos: _images,
       price: _priceController.text,
       expiryDate: _expiryDateController.text,
+      description: _descriptionController.text
     );
 
     Provider.of<ItemProvider>(context, listen: false).addItem(item);
+
+    Navigator.pop(context);
 
     // Call the onSubmit callback to navigate to the Marketplace screen
     widget.onSubmit();
@@ -193,6 +197,16 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
                 FocusScope.of(context).requestFocus(FocusNode());
                 await _selectDate(context);
               },
+            ),
+            const SizedBox(height: 16),
+            const Text('Description'),
+            TextField(
+              controller: _descriptionController,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              ),
+              style: TextStyle(height: 10),
             ),
             const SizedBox(height: 16),
             Center(
