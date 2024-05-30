@@ -177,7 +177,8 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
               padding: const EdgeInsets.all(16.0),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue, // Background color
+                  backgroundColor:
+                      Color.fromARGB(255, 43, 173, 199), // Background color
                   foregroundColor: Colors.white, // Text color
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   shape: RoundedRectangleBorder(
