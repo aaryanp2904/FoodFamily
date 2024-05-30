@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../item_model.dart';
 
@@ -17,6 +18,7 @@ class ItemDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            kIsWeb ? Image.network(item.photos[0].path, width: screenWidth*0.15, height: screenWidth*0.15, fit: BoxFit.cover,):
             Image.file(
               item.photos[0],
               width: screenWidth,
