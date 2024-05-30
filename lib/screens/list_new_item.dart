@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -30,10 +34,12 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
     if (source == ImageSource.gallery) {
       final pickedFiles = await picker.pickMultiImage();
       if (pickedFiles != null) {
-        setState(() {
-          _images.addAll(
-              pickedFiles.map((pickedFile) => File(pickedFile.path)).toList());
-        });
+        for (var pickedFile in pickedFiles) {
+          File compressedImage = await _compressImage(File(pickedFile.path));
+          setState(() {
+            _images.add(compressedImage);
+          });
+        }
       }
     } else if (source == ImageSource.camera) {
       bool continueTakingPhotos = true;
@@ -41,8 +47,9 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
       while (continueTakingPhotos) {
         final pickedFile = await picker.pickImage(source: source);
         if (pickedFile != null) {
+          File compressedImage = await _compressImage(File(pickedFile.path));
           setState(() {
-            _images.add(File(pickedFile.path));
+            _images.add(compressedImage);
           });
         } else {
           continueTakingPhotos = false;
@@ -51,6 +58,23 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
         continueTakingPhotos = await _showContinueTakingPhotosDialog();
       }
     }
+  }
+
+  Future<File> _compressImage(File file) async {
+    final dir = await getTemporaryDirectory();
+    final targetPath = "${dir.absolute.path}/${DateTime.now().millisecondsSinceEpoch}.jpg";
+
+    var result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      targetPath,
+      quality: 70,
+    );
+
+    if (result != null) {
+    return File(result.path);
+  } else {
+    return file;
+  }
   }
 
   Future<bool> _showContinueTakingPhotosDialog() async {
