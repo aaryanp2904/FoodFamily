@@ -14,4 +14,14 @@ class Item {
     required this.expiryDate,
     required this.description
   });
+
+  factory Item.fromFirestore(Map<String, dynamic> data) {
+    return Item(
+      name: data['name'],
+      photos: (data['images'] as List).map((url) => File(url)).toList(),
+      price: data['price'],
+      expiryDate: data['expiryDate'],
+      description: data['description'],
+    );
+  }
 }

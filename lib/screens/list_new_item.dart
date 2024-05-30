@@ -119,7 +119,7 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
     }
   }
 
-  void _submitItem() {
+  void _submitItem() async{
     if (_nameController.text.isEmpty ||
         _images.isEmpty ||
         _priceController.text.isEmpty ||
@@ -135,19 +135,57 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
       return;
     }
 
-    final item = Item(
+    try {
+      List<String> imageUrls = [];
+      for (var image in _images) {
+        String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+        Reference reference = FirebaseStorage.instance.ref().child('items/$fileName');
+        UploadTask uploadTask = reference.putFile(image);
+        TaskSnapshot taskSnapshot = await uploadTask;
+        String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+        imageUrls.add(downloadUrl);
+      }
+      await FirebaseFirestore.instance.collection('items').add({
+        'name': _nameController.text,
+        'price': _priceController.text,
+        'expiryDate': _expiryDateController.text,
+        'description': _descriptionController.text,
+        'images': imageUrls,
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Item listed successfully')));
+
+      Provider.of<ItemProvider>(context, listen: false).addItem(Item(
         name: _nameController.text,
         photos: _images,
         price: _priceController.text,
         expiryDate: _expiryDateController.text,
-        description: _descriptionController.text);
+        description: _descriptionController.text,
+      ));
 
-    Provider.of<ItemProvider>(context, listen: false).addItem(item);
+      Navigator.pop(context);
+      widget.onSubmit();
+    } catch (e) {
+      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to list item')));
+    }
 
-    Navigator.pop(context);
+    
 
-    // Call the onSubmit callback to navigate to the Marketplace screen
-    widget.onSubmit();
+
+
+    // final item = Item(
+    //     name: _nameController.text,
+    //     photos: _images,
+    //     price: _priceController.text,
+    //     expiryDate: _expiryDateController.text,
+    //     description: _descriptionController.text);
+
+    // Provider.of<ItemProvider>(context, listen: false).addItem(item);
+
+    // Navigator.pop(context);
+
+    // // Call the onSubmit callback to navigate to the Marketplace screen
+    // widget.onSubmit();
   }
 
   @override

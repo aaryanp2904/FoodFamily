@@ -25,7 +25,14 @@ void main() async {
             appId: "1:1001319224053:web:b2761e88aae5a36cc56bbc"));
   }
 
-  runApp(MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => ItemProvider()),
+      ],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
