@@ -31,10 +31,10 @@ class MyApp extends StatelessWidget {
   // Create a ValueNotifier to manage the theme state
   final ValueNotifier<bool> _isDarkMode = ValueNotifier(false);
 
-  ThemeData dark = ThemeData(textTheme: Typography.whiteCupertino,
+  ThemeData dark = ThemeData(
+      textTheme: Typography.whiteCupertino,
       brightness: Brightness.dark,
-      useMaterial3: true
-  );
+      useMaterial3: true);
 
   ThemeData light = ThemeData(
     primaryColor: Colors.white,
