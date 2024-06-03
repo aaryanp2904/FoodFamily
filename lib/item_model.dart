@@ -23,7 +23,7 @@ class Item {
       price: data['price'],
       expiryDate: data['expiryDate'],
       description: data['description'],
-      tags: data['tags'],
+      tags: data['tags'].from(data['tags']),
     );
   }
 }
