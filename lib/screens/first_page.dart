@@ -30,7 +30,7 @@ class _FirstPageState extends State<FirstPage> {
   void initState() {
     super.initState();
     _pages.addAll([
-      Marketplace(),
+      Marketplace(isDarkMode: widget.isDarkMode),
       SellPage(onSubmit: () {
         setState(() {
           _currentPage = 0; // Navigate to Marketplace page

@@ -46,7 +46,8 @@ class MyApp extends StatelessWidget {
   ThemeData dark = ThemeData(
       textTheme: Typography.whiteCupertino,
       brightness: Brightness.dark,
-      useMaterial3: true);
+      useMaterial3: true,
+  );
 
   ThemeData light = ThemeData(
     primaryColor: Colors.white,
@@ -71,10 +72,9 @@ class MyApp extends StatelessWidget {
               '/register': (context) => RegisterPage(),
               '/first_page': (context) => FirstPage(isDarkMode: _isDarkMode),
               '/sell': (context) => SellPage(onSubmit: () {
-                    // Navigate to the Marketplace screen
-                    Navigator.of(context).pushReplacementNamed('/marketplace');
-                  }),
-              '/marketplace': (context) => const Marketplace(),
+                Navigator.of(context).pushReplacementNamed('/marketplace');
+              }),
+              '/marketplace': (context) => Marketplace(isDarkMode: _isDarkMode),
               '/profile': (context) => ProfilePage(isDarkMode: _isDarkMode),
             },
           );
