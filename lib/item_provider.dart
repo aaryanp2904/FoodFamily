@@ -15,7 +15,8 @@ class ItemProvider with ChangeNotifier {
 
   Future<void> fetchItems() async {
     try {
-      final QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('items').get();
+      final QuerySnapshot snapshot =
+          await FirebaseFirestore.instance.collection('items').get();
       _items = snapshot.docs.map((doc) {
         final data = doc.data() as Map<String, dynamic>;
         return Item(
@@ -24,6 +25,7 @@ class ItemProvider with ChangeNotifier {
           price: data['price'],
           expiryDate: data['expiryDate'],
           description: data['description'],
+          tags: data['tags'],
         );
       }).toList();
       notifyListeners();

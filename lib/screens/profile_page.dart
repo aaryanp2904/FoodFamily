@@ -196,7 +196,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ],
               ),
               const SizedBox(height: 16),
-              const Text('HELLO WORLD ROHAN', style: TextStyle(fontSize: 16)),
+              const Text('Accommodation', style: TextStyle(fontSize: 16)),
               const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(

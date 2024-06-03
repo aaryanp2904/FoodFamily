@@ -27,6 +27,7 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _expiryDateController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final List<String> _selectedTags = [];
 
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
@@ -62,7 +63,8 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
 
   Future<File> _compressImage(File file) async {
     final dir = await getTemporaryDirectory();
-    final targetPath = "${dir.absolute.path}/${DateTime.now().millisecondsSinceEpoch}.jpg";
+    final targetPath =
+        "${dir.absolute.path}/${DateTime.now().millisecondsSinceEpoch}.jpg";
 
     var result = await FlutterImageCompress.compressAndGetFile(
       file.absolute.path,
@@ -71,10 +73,10 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
     );
 
     if (result != null) {
-    return File(result.path);
-  } else {
-    return file;
-  }
+      return File(result.path);
+    } else {
+      return file;
+    }
   }
 
   Future<bool> _showContinueTakingPhotosDialog() async {
@@ -119,17 +121,19 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
     }
   }
 
-  void _submitItem() async{
+  void _submitItem() async {
     if (_nameController.text.isEmpty ||
         _images.isEmpty ||
         _priceController.text.isEmpty ||
-        _expiryDateController.text.isEmpty) {
+        _expiryDateController.text.isEmpty ||
+        _selectedTags.isEmpty) {
       // Show an error message or handle the validation as needed
       showDialog(
         context: context,
         builder: (context) => const AlertDialog(
           title: Text('Missing Fields'),
-          content: Text('Make sure to fill out ALL fields, including photo.'),
+          content: Text(
+              'Make sure to fill out ALL fields, including photo and tags.'),
         ),
       );
       return;
@@ -139,7 +143,8 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
       List<String> imageUrls = [];
       for (var image in _images) {
         String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-        Reference reference = FirebaseStorage.instance.ref().child('items/$fileName');
+        Reference reference =
+            FirebaseStorage.instance.ref().child('items/$fileName');
         UploadTask uploadTask = reference.putFile(image);
         TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
         if (taskSnapshot.state == TaskState.success) {
@@ -148,7 +153,8 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
           print('Upload successful: $downloadUrl');
         } else {
           print('Upload failed');
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to upload image')));
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text('Failed to upload image')));
           return;
         }
       }
@@ -158,8 +164,10 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
         'expiryDate': _expiryDateController.text,
         'description': _descriptionController.text,
         'images': imageUrls,
+        'tags': _selectedTags,
       });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Item listed successfully')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Item listed successfully')));
 
       Provider.of<ItemProvider>(context, listen: false).addItem(Item(
         name: _nameController.text,
@@ -167,32 +175,16 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
         price: _priceController.text,
         expiryDate: _expiryDateController.text,
         description: _descriptionController.text,
+        tags: _selectedTags,
       ));
 
       Navigator.pop(context);
       widget.onSubmit();
     } catch (e) {
       print(e);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to list item')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Failed to list item')));
     }
-
-    
-
-
-
-    // final item = Item(
-    //     name: _nameController.text,
-    //     photos: _images,
-    //     price: _priceController.text,
-    //     expiryDate: _expiryDateController.text,
-    //     description: _descriptionController.text);
-
-    // Provider.of<ItemProvider>(context, listen: false).addItem(item);
-
-    // Navigator.pop(context);
-
-    // // Call the onSubmit callback to navigate to the Marketplace screen
-    // widget.onSubmit();
   }
 
   @override
@@ -301,6 +293,27 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
                   hintText: 'Enter description',
                 ),
                 maxLines: 5,
+              ),
+              const SizedBox(height: 24),
+              const Text('Tags (*)'),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 10,
+                children: ['fruit', 'dairy', 'vegetables', 'meal', 'frozen']
+                    .map((tag) => ChoiceChip(
+                          label: Text(tag),
+                          selected: _selectedTags.contains(tag),
+                          onSelected: (selected) {
+                            setState(() {
+                              if (selected) {
+                                _selectedTags.add(tag);
+                              } else {
+                                _selectedTags.remove(tag);
+                              }
+                            });
+                          },
+                        ))
+                    .toList(),
               ),
               const SizedBox(height: 24),
               Center(
