@@ -155,6 +155,14 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
                       ),
                     ),
                     const SizedBox(height: 20),
+                    Text(
+                      'Tags:',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: screenWidth * 0.045,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
                     Wrap(
                       spacing: 5,
                       children: widget.item.tags.map((tag) {
