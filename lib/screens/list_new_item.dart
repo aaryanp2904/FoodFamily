@@ -307,21 +307,22 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
               const SizedBox(height: 8),
               Wrap(
                 spacing: 10,
-                children: ['fruit', 'dairy', 'vegetables', 'meal', 'frozen']
-                    .map((tag) => ChoiceChip(
-                          label: Text(tag),
-                          selected: _selectedTags.contains(tag),
-                          onSelected: (selected) {
-                            setState(() {
-                              if (selected) {
-                                _selectedTags.add(tag);
-                              } else {
-                                _selectedTags.remove(tag);
-                              }
-                            });
-                          },
-                        ))
-                    .toList(),
+                children:
+                    ['fruit', 'dairy', 'vegetables', 'meal', 'frozen', 'other']
+                        .map((tag) => ChoiceChip(
+                              label: Text(tag),
+                              selected: _selectedTags.contains(tag),
+                              onSelected: (selected) {
+                                setState(() {
+                                  if (selected) {
+                                    _selectedTags.add(tag);
+                                  } else {
+                                    _selectedTags.remove(tag);
+                                  }
+                                });
+                              },
+                            ))
+                        .toList(),
               ),
               const SizedBox(height: 24),
               Center(

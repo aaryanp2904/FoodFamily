@@ -13,6 +13,7 @@ class Marketplace extends StatefulWidget {
 class _MarketplaceState extends State<Marketplace> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  List<String> _selectedTags = [];
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +21,9 @@ class _MarketplaceState extends State<Marketplace> {
     final items = itemProvider.items;
     final filteredItems = items
         .where((item) =>
-            item.name.toLowerCase().contains(_searchQuery.toLowerCase()))
+            item.name.toLowerCase().contains(_searchQuery.toLowerCase()) &&
+            (_selectedTags.isEmpty ||
+                item.tags.any((tag) => _selectedTags.contains(tag))))
         .toList();
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -47,6 +50,31 @@ class _MarketplaceState extends State<Marketplace> {
                   _searchQuery = value;
                 });
               },
+            ),
+          ),
+          Container(
+            height: 50,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              children: ['fruit', 'dairy', 'vegetables', 'meal', 'frozen']
+                  .map((tag) => Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        child: ChoiceChip(
+                          label: Text(tag),
+                          selected: _selectedTags.contains(tag),
+                          onSelected: (selected) {
+                            setState(() {
+                              if (selected) {
+                                _selectedTags.add(tag);
+                              } else {
+                                _selectedTags.remove(tag);
+                              }
+                            });
+                          },
+                        ),
+                      ))
+                  .toList(),
             ),
           ),
           Expanded(
