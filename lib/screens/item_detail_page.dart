@@ -154,6 +154,16 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
                         color: Colors.grey[800],
                       ),
                     ),
+                    const SizedBox(height: 20),
+                    Wrap(
+                      spacing: 5,
+                      children: widget.item.tags.map((tag) {
+                        return Chip(
+                          label: Text(tag),
+                          backgroundColor: Colors.blue.shade100,
+                        );
+                      }).toList(),
+                    ),
                   ],
                 ),
               ),
