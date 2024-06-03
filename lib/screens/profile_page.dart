@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 import 'country_flags.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 
 class ProfilePage extends StatefulWidget {
   final ValueNotifier<bool> isDarkMode;
@@ -15,74 +14,70 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  final _auth = FirebaseAuth.instance;
+  final _firestore = FirebaseFirestore.instance;
+  final _fullNameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _instagramController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _accommodationController = TextEditingController();
   String? selectedAccommodation;
-  final TextEditingController _countryCodeController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _fullNameController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool _isEditable = true;
-
-  String getFlagEmoji(String countryCode) {
-    return countryFlags[countryCode] ?? '';
-  }
-
-  Future<String> _getLocalFilePath() async {
-    final directory = await getApplicationDocumentsDirectory();
-    return '${directory.path}/profile.txt';
-  }
-
-  Future<void> _saveToFile(String content) async {
-    final path = await _getLocalFilePath();
-    final file = File(path);
-    await file.writeAsString(content);
-  }
-
-  Future<void> _checkIfProfileExists() async {
-    final path = await _getLocalFilePath();
-    final file = File(path);
-    if (await file.exists()) {
-      final content = await file.readAsString();
-      final lines = content.split('\n');
-      if (lines.length >= 4) {
-        setState(() {
-          _fullNameController.text = lines[0].replaceFirst('Full Name: ', '');
-          _countryCodeController.text =
-              lines[1].replaceFirst('Country Code: ', '');
-          _phoneController.text = lines[2].replaceFirst('Phone Number: ', '');
-          selectedAccommodation = lines[3].replaceFirst('Accommodation: ', '');
-          _isEditable = false;
-        });
-      }
-    }
-  }
+  bool _isEditable = false;
 
   @override
   void initState() {
     super.initState();
-    _checkIfProfileExists();
+    _loadUserData();
+  }
+
+  void _loadUserData() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final doc = await _firestore.collection('users').doc(user.uid).get();
+      if (doc.exists) {
+        final data = doc.data();
+        if (data != null) {
+          _fullNameController.text = data['fullName'];
+          _phoneController.text = data['phone'];
+          //_countryCodeController.text = data['phone'].substring(0, 2);
+          _instagramController.text = data['instagram'];
+          _emailController.text = data['email'];
+          setState(() {
+            selectedAccommodation = data['accommodation'];
+          });
+        }
+      }
+    }
   }
 
   void _saveChanges() async {
-    if (_formKey.currentState!.validate()) {
-      // Save the data to a local file
-      final fullName = _fullNameController.text;
-      final countryCode = _countryCodeController.text;
-      final phoneNumber = _phoneController.text;
-      final accommodation = selectedAccommodation ?? '';
-
-      final content =
-          'Full Name: $fullName\nCountry Code: $countryCode\nPhone Number: $phoneNumber\nAccommodation: $accommodation';
-      await _saveToFile(content);
-
-      // Disable further editing
+    final user = _auth.currentUser;
+    if (user != null) {
+      await _firestore.collection('users').doc(user.uid).update({
+        'fullName': _fullNameController.text,
+        'phone': _phoneController.text,
+        'instagram': _instagramController.text,
+        'email': _emailController.text,
+        'accommodation': _accommodationController.text,
+      });
       setState(() {
         _isEditable = false;
       });
     }
   }
 
+  void _resetPassword() {
+    final user = _auth.currentUser;
+    if (user != null) {
+      _auth.sendPasswordResetEmail(email: user.email!);
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Password reset email sent')));
+    }
+  }
+
   void _logout() async {
-    await FirebaseAuth.instance.signOut();
+    await _auth.signOut();
     Navigator.pushReplacementNamed(context, '/login');
   }
 
@@ -90,10 +85,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-        centerTitle: true,
-        toolbarHeight: 80,
+        title: Text('Profile'),
         actions: [
           IconButton(
             icon: Icon(Icons.logout),
@@ -111,7 +103,7 @@ class _ProfilePageState extends State<ProfilePage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Dark Mode', style: TextStyle(fontSize: 18)),
+                  Text('Dark Mode', style: TextStyle(fontSize: 18)),
                   ValueListenableBuilder(
                     valueListenable: widget.isDarkMode,
                     builder: (context, isDark, child) {
@@ -125,16 +117,16 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
-              const Center(
+              SizedBox(height: 24),
+              Center(
                 child: Text(
                   'Personal Details',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
-              const SizedBox(height: 24),
-              const Text('Full Name', style: TextStyle(fontSize: 16)),
-              const SizedBox(height: 8),
+              SizedBox(height: 24),
+              Text('Full Name', style: TextStyle(fontSize: 16)),
+              SizedBox(height: 8),
               TextFormField(
                 controller: _fullNameController,
                 enabled: _isEditable,
@@ -142,82 +134,54 @@ class _ProfilePageState extends State<ProfilePage> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
                 ),
               ),
-              const SizedBox(height: 16),
-              const Text('Phone Number', style: TextStyle(fontSize: 16)),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  SizedBox(
-                    width: 80,
-                    child: TextFormField(
-                      controller: _countryCodeController,
-                      enabled: _isEditable,
-                      decoration: InputDecoration(
-                        prefixIcon: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Text(
-                            getFlagEmoji(_countryCodeController.text ?? ''),
-                            style: const TextStyle(fontSize: 24),
-                          ),
-                        ),
-                        hintText: '+',
+              SizedBox(height: 16),
+              Text('Phone Number', style: TextStyle(fontSize: 16)),
+              SizedBox(height: 8),
+              TextFormField(
+                controller: _phoneController,
+                enabled: _isEditable,
+                decoration: InputDecoration(
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 15),
+                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
                       ),
-                      keyboardType: TextInputType.phone,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      onChanged: (value) {
-                        setState(
-                            () {}); // Update the flag emoji when the code changes
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _phoneController,
-                      enabled: _isEditable,
-                      decoration: InputDecoration(
-                        hintText: 'Phone Number',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 15),
-                      ),
-                      keyboardType: TextInputType.phone,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a phone number';
-                        }
-                        if (!RegExp(r'^\d{9,15}$').hasMatch(value)) {
-                          return 'Please enter a valid phone number';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                ],
+                keyboardType: TextInputType.phone,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               ),
-              const SizedBox(height: 16),
-              const Text('Accommodation', style: TextStyle(fontSize: 16)),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<String>(
+              SizedBox(height: 16),
+              Text('Instagram', style: TextStyle(fontSize: 16)),
+              SizedBox(height: 8),
+              TextFormField(
+                controller: _instagramController,
+                enabled: _isEditable,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
                 ),
+              ),
+              SizedBox(height: 16),
+              Text('Email', style: TextStyle(fontSize: 16)),
+              SizedBox(height: 8),
+              TextFormField(
+                controller: _emailController,
+                enabled: false,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                ),
+              ),
+              SizedBox(height: 16),
+              Text('Accommodation', style: TextStyle(fontSize: 16)),
+              SizedBox(height: 8),
+              DropdownButtonFormField<String>(
                 value: selectedAccommodation,
                 onChanged: _isEditable
                     ? (String? newValue) {
@@ -240,22 +204,32 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Text(value),
                   );
                 }).toList(),
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                ),
+                disabledHint: selectedAccommodation != null
+                    ? Text(selectedAccommodation!)
+                    : null,
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24),
               Center(
                 child: ElevatedButton(
-                  onPressed: _isEditable ? _saveChanges : null,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 32, vertical: 12),
-                    textStyle: const TextStyle(fontSize: 16),
-                    backgroundColor: const Color.fromARGB(255, 43, 173, 199),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: const Text('Save Changes'),
+                  onPressed: _isEditable ? _saveChanges : () {
+                    setState(() {
+                      _isEditable = true;
+                    });
+                  },
+                  child: Text(_isEditable ? 'Save' : 'Edit Profile'),
+                ),
+              ),
+              SizedBox(height: 16),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _resetPassword,
+                  child: Text('Reset Password'),
                 ),
               ),
             ],

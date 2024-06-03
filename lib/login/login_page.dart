@@ -29,29 +29,44 @@ class _LoginPageState extends State<LoginPage> {
       appBar: AppBar(title: Text('Login')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: <Widget>[
-            TextField(
-              controller: _emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _login,
-              child: Text('Login'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/register');
-              },
-              child: Text('Register'),
-            ),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              TextField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                ),
+              ),
+              SizedBox(height: 16),
+              TextField(
+                controller: _passwordController,
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                ),
+                obscureText: true,
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _login,
+                child: Text('Login'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/register');
+                },
+                child: Text('Register'),
+              ),
+            ],
+          ),
         ),
       ),
     );
