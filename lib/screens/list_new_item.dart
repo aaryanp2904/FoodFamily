@@ -153,8 +153,10 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
           print('Upload successful: $downloadUrl');
         } else {
           print('Upload failed');
-          ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text('Failed to upload image')));
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed to upload image')));
+          }
           return;
         }
       }
@@ -166,8 +168,10 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
         'images': imageUrls,
         'tags': _selectedTags,
       });
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Item listed successfully')));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Item listed successfully')));
+      }
 
       Provider.of<ItemProvider>(context, listen: false).addItem(Item(
         name: _nameController.text,
@@ -178,12 +182,16 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
         tags: _selectedTags,
       ));
 
-      Navigator.pop(context);
-      widget.onSubmit();
+      if (mounted) {
+        Navigator.pop(context);
+        widget.onSubmit();
+      }
     } catch (e) {
       print(e);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Failed to list item')));
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Failed to list item')));
+      }
     }
   }
 
