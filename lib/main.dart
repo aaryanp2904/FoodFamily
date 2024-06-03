@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'item_provider.dart';
@@ -9,12 +9,14 @@ import 'screens/first_page.dart';
 import 'screens/marketplace.dart';
 import 'screens/sell_page.dart';
 import 'screens/profile_page.dart';
+import 'login/login_page.dart';
+import 'login/register_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   if (Platform.isIOS) {
     await Firebase.initializeApp();
-  } else{
+  } else {
     await Firebase.initializeApp(
         options: const FirebaseOptions(
             apiKey: "AIzaSyAeqir9YNwIIRhmPBd78nSv-FjEcRc5_VA",
@@ -63,8 +65,11 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
             theme: isDark ? dark : light,
-            home: FirstPage(isDarkMode: _isDarkMode),
+            home: AuthWrapper(isDarkMode: _isDarkMode),
             routes: {
+              '/login': (context) => LoginPage(),
+              '/register': (context) => RegisterPage(),
+              '/first_page': (context) => FirstPage(isDarkMode: _isDarkMode),
               '/sell': (context) => SellPage(onSubmit: () {
                     // Navigate to the Marketplace screen
                     Navigator.of(context).pushReplacementNamed('/marketplace');
@@ -75,6 +80,28 @@ class MyApp extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class AuthWrapper extends StatelessWidget {
+  final ValueNotifier<bool> isDarkMode;
+
+  AuthWrapper({required this.isDarkMode});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(body: Center(child: CircularProgressIndicator()));
+        } else if (snapshot.hasData) {
+          return FirstPage(isDarkMode: isDarkMode); // Navigate to FirstPage if user is authenticated
+        } else {
+          return LoginPage(); // Navigate to LoginPage if user is not authenticated
+        }
+      },
     );
   }
 }

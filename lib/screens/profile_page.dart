@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'country_flags.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
@@ -80,6 +81,11 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  void _logout() async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacementNamed(context, '/login');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,6 +94,12 @@ class _ProfilePageState extends State<ProfilePage> {
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         centerTitle: true,
         toolbarHeight: 80,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: _logout,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
