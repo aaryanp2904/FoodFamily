@@ -25,7 +25,7 @@ class ItemProvider with ChangeNotifier {
           price: data['price'],
           expiryDate: data['expiryDate'],
           description: data['description'],
-          tags: data['tags'],
+          tags: List<String>.from(data['tags']),
         );
       }).toList();
       notifyListeners();
