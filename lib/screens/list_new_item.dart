@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -160,26 +161,33 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
           return;
         }
       }
-      await FirebaseFirestore.instance.collection('items').add({
+
+      final newItem = FirebaseFirestore.instance.collection('items').doc(); // Generate a new document reference
+      await newItem.set({
+        'id': newItem.id, // Use the document ID
         'name': _nameController.text,
         'price': _priceController.text,
         'expiryDate': _expiryDateController.text,
         'description': _descriptionController.text,
         'images': imageUrls,
         'tags': _selectedTags,
+        'userId': FirebaseAuth.instance.currentUser!.uid,
       });
+
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Item listed successfully')));
       }
 
       Provider.of<ItemProvider>(context, listen: false).addItem(Item(
+        id: newItem.id,
         name: _nameController.text,
         photos: imageUrls,
         price: _priceController.text,
         expiryDate: _expiryDateController.text,
         description: _descriptionController.text,
         tags: _selectedTags,
+        userId: FirebaseAuth.instance.currentUser!.uid,
       ));
 
       if (mounted) {

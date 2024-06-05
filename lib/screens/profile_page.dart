@@ -59,7 +59,7 @@ class _ProfilePageState extends State<ProfilePage> {
         'phone': _phoneController.text,
         'instagram': _instagramController.text,
         'email': _emailController.text,
-        'accommodation': _accommodationController.text,
+        'accommodation': selectedAccommodation,
       });
       setState(() {
         _isEditable = false;

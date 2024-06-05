@@ -20,7 +20,7 @@ class _MarketplaceState extends State<Marketplace> {
   @override
   Widget build(BuildContext context) {
     final itemProvider = Provider.of<ItemProvider>(context);
-    final items = itemProvider.items;
+    final items = itemProvider.marketplaceItems;
     final filteredItems = items
         .where((item) =>
     item.name.toLowerCase().contains(_searchQuery.toLowerCase()) &&
