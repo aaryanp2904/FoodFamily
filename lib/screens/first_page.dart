@@ -31,11 +31,14 @@ class _FirstPageState extends State<FirstPage> {
     super.initState();
     _pages.addAll([
       Marketplace(isDarkMode: widget.isDarkMode),
-      SellPage(onSubmit: () {
-        setState(() {
-          _currentPage = 0; // Navigate to Marketplace page
-        });
-      }),
+      SellPage(
+        onSubmit: () {
+          setState(() {
+            _currentPage = 0; // Navigate to Marketplace page
+          });
+        },
+        isDarkMode: widget.isDarkMode,
+      ),
       ProfilePage(isDarkMode: widget.isDarkMode),
     ]);
   }

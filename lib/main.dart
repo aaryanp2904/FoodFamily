@@ -44,9 +44,9 @@ class MyApp extends StatelessWidget {
   final ValueNotifier<bool> _isDarkMode = ValueNotifier(false);
 
   ThemeData dark = ThemeData(
-      textTheme: Typography.whiteCupertino,
-      brightness: Brightness.dark,
-      useMaterial3: true,
+    textTheme: Typography.whiteCupertino,
+    brightness: Brightness.dark,
+    useMaterial3: true,
   );
 
   ThemeData light = ThemeData(
@@ -71,9 +71,13 @@ class MyApp extends StatelessWidget {
               '/login': (context) => LoginPage(),
               '/register': (context) => RegisterPage(),
               '/first_page': (context) => FirstPage(isDarkMode: _isDarkMode),
-              '/sell': (context) => SellPage(onSubmit: () {
-                Navigator.of(context).pushReplacementNamed('/marketplace');
-              }),
+              '/sell': (context) => SellPage(
+                    onSubmit: () {
+                      Navigator.of(context)
+                          .pushReplacementNamed('/marketplace');
+                    },
+                    isDarkMode: _isDarkMode,
+                  ),
               '/marketplace': (context) => Marketplace(isDarkMode: _isDarkMode),
               '/profile': (context) => ProfilePage(isDarkMode: _isDarkMode),
             },
@@ -97,7 +101,9 @@ class AuthWrapper extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(body: Center(child: CircularProgressIndicator()));
         } else if (snapshot.hasData) {
-          return FirstPage(isDarkMode: isDarkMode); // Navigate to FirstPage if user is authenticated
+          return FirstPage(
+              isDarkMode:
+                  isDarkMode); // Navigate to FirstPage if user is authenticated
         } else {
           return LoginPage(); // Navigate to LoginPage if user is not authenticated
         }

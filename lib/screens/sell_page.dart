@@ -10,8 +10,9 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // Add this import
 
 class SellPage extends StatefulWidget {
   final VoidCallback onSubmit;
+  final ValueNotifier<bool> isDarkMode;
 
-  const SellPage({super.key, required this.onSubmit});
+  const SellPage({super.key, required this.onSubmit, required this.isDarkMode});
 
   @override
   _SellPageState createState() => _SellPageState();
@@ -32,7 +33,8 @@ class _SellPageState extends State<SellPage> {
   void _fetchUserItems() async {
     final user = _auth.currentUser;
     if (user != null) {
-      await Provider.of<ItemProvider>(context, listen: false).fetchUserItems(user.uid);
+      await Provider.of<ItemProvider>(context, listen: false)
+          .fetchUserItems(user.uid);
     }
   }
 
@@ -46,7 +48,8 @@ class _SellPageState extends State<SellPage> {
       print('Enquirer: $enquirerName, ID: $enquirerId');
 
       // Fetch enquirer's phone number
-      final String? enquirerPhoneNumber = await _getEnquirerPhoneNumber(enquirerId);
+      final String? enquirerPhoneNumber =
+          await _getEnquirerPhoneNumber(enquirerId);
 
       if (enquirerPhoneNumber != null) {
         // Empty the enquiries queue
@@ -56,7 +59,8 @@ class _SellPageState extends State<SellPage> {
         item.contactMessage = 'Contact $enquirerName at $enquirerPhoneNumber';
 
         // Update Firestore
-        final DocumentReference itemDoc = FirebaseFirestore.instance.collection('items').doc(item.id);
+        final DocumentReference itemDoc =
+            FirebaseFirestore.instance.collection('items').doc(item.id);
         await itemDoc.update(item.toFirestore());
 
         // Update state to show contact message
@@ -85,7 +89,8 @@ class _SellPageState extends State<SellPage> {
       item.enquiries.remove(firstEnquirer.key);
 
       // Update Firestore
-      final DocumentReference itemDoc = FirebaseFirestore.instance.collection('items').doc(item.id);
+      final DocumentReference itemDoc =
+          FirebaseFirestore.instance.collection('items').doc(item.id);
       await itemDoc.update(item.toFirestore());
 
       // Update state
@@ -98,7 +103,10 @@ class _SellPageState extends State<SellPage> {
   Future<String?> _getEnquirerPhoneNumber(String userId) async {
     try {
       print('Fetching phone number for user ID: $userId');
-      final DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+      final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
 
       if (userDoc.exists) {
         final userData = userDoc.data() as Map<String, dynamic>;
@@ -203,7 +211,9 @@ class _SellPageState extends State<SellPage> {
               itemCount: filteredItems.length,
               itemBuilder: (context, index) {
                 final item = filteredItems[index];
-                final firstEnquirer = item.enquiries.isNotEmpty ? item.enquiries.entries.first : null;
+                final firstEnquirer = item.enquiries.isNotEmpty
+                    ? item.enquiries.entries.first
+                    : null;
 
                 return GestureDetector(
                   onTap: () {
@@ -266,7 +276,8 @@ class _SellPageState extends State<SellPage> {
                                     ),
                                     const SizedBox(height: 5),
                                     Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
                                           "£${item.price}",
@@ -303,7 +314,8 @@ class _SellPageState extends State<SellPage> {
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                    if (firstEnquirer != null && item.contactMessage == null) ...[
+                                    if (firstEnquirer != null &&
+                                        item.contactMessage == null) ...[
                                       const SizedBox(height: 5),
                                       Row(
                                         children: [
@@ -317,12 +329,16 @@ class _SellPageState extends State<SellPage> {
                                             ),
                                           ),
                                           IconButton(
-                                            icon: Icon(Icons.check, color: Colors.green),
-                                            onPressed: () => _handleAcceptEnquiry(item),
+                                            icon: Icon(Icons.check,
+                                                color: Colors.green),
+                                            onPressed: () =>
+                                                _handleAcceptEnquiry(item),
                                           ),
                                           IconButton(
-                                            icon: Icon(Icons.close, color: Colors.red),
-                                            onPressed: () => _handleRemoveEnquiry(item),
+                                            icon: Icon(Icons.close,
+                                                color: Colors.red),
+                                            onPressed: () =>
+                                                _handleRemoveEnquiry(item),
                                           ),
                                         ],
                                       ),
@@ -333,7 +349,10 @@ class _SellPageState extends State<SellPage> {
                                       children: item.tags.map((tag) {
                                         return Chip(
                                           label: Text(tag),
-                                          backgroundColor: Colors.blue.shade100,
+                                          backgroundColor:
+                                              widget.isDarkMode.value
+                                                  ? Colors.grey.shade700
+                                                  : Colors.blue.shade100,
                                         );
                                       }).toList(),
                                     ),
