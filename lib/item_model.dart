@@ -41,6 +41,32 @@ class Item {
     );
   }
 
+  Item copyWith({
+    String? id,
+    String? name,
+    String? price,
+    String? expiryDate,
+    String? description,
+    List<String>? tags,
+    List<String>? photos,
+    String? userId,
+    Map<String, String>? enquiries,
+    String? contactMessage,
+  }) {
+    return Item(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      price: price ?? this.price,
+      expiryDate: expiryDate ?? this.expiryDate,
+      description: description ?? this.description,
+      tags: tags ?? this.tags,
+      photos: photos ?? this.photos,
+      userId: userId ?? this.userId,
+      enquiries: enquiries ?? this.enquiries,
+      contactMessage: contactMessage ?? this.contactMessage,
+    );
+  }
+
   Map<String, dynamic> toFirestore() {
     return {
       'name': name,
@@ -55,7 +81,3 @@ class Item {
     };
   }
 }
-
-
-
-

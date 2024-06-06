@@ -1,19 +1,18 @@
-// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../item_model.dart';
+import 'edit_item_page.dart'; // Import the edit item page
 
 class ItemDetailForSellPage extends StatefulWidget {
   final Item item;
   final ValueNotifier<bool> isDarkMode;
-  final bool isOwner;
+  final VoidCallback onSubmit;
 
   const ItemDetailForSellPage({
     super.key,
     required this.item,
     required this.isDarkMode,
-    this.isOwner = false,
+    required this.onSubmit,
   });
 
   @override
@@ -29,6 +28,7 @@ class _ItemDetailForSellPageState extends State<ItemDetailForSellPage> {
           .collection('items')
           .doc(widget.item.id)
           .delete();
+      widget.onSubmit(); // Call the onSubmit callback to refresh listings
       Navigator.of(context).pop(); // Go back to the previous screen
       ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Listing removed successfully')));
@@ -36,6 +36,18 @@ class _ItemDetailForSellPageState extends State<ItemDetailForSellPage> {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Error removing listing: $e')));
     }
+  }
+
+  Future<void> _editListing() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => EditItemPage(
+          item: widget.item,
+          onSubmit: widget.onSubmit,
+        ),
+      ),
+    );
+    setState(() {}); // Refresh the page after editing
   }
 
   @override
@@ -206,27 +218,57 @@ class _ItemDetailForSellPageState extends State<ItemDetailForSellPage> {
                     ),
                   ),
                 ),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16.0),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 43, 173, 199),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                const Color.fromARGB(255, 43, 173, 199),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                          onPressed: _removeListing,
+                          child: const Text(
+                            'Remove Listing',
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                    onPressed: _removeListing,
-                    child: const Text(
-                      'Remove Listing',
-                      style: TextStyle(
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.bold,
+                    const SizedBox(width: 8.0),
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                          onPressed: _editListing,
+                          child: const Text(
+                            'Edit Listing',
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),

@@ -222,7 +222,8 @@ class _SellPageState extends State<SellPage> {
                       MaterialPageRoute(
                         builder: (context) => ItemDetailForSellPage(
                           item: item,
-                          isDarkMode: ValueNotifier(false),
+                          isDarkMode: widget.isDarkMode,
+                          onSubmit: widget.onSubmit, // Pass the callback
                         ),
                       ),
                     );
