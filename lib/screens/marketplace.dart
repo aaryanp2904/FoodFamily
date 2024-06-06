@@ -23,9 +23,9 @@ class _MarketplaceState extends State<Marketplace> {
     final items = itemProvider.marketplaceItems;
     final filteredItems = items
         .where((item) =>
-    item.name.toLowerCase().contains(_searchQuery.toLowerCase()) &&
-        (_selectedTags.isEmpty ||
-            item.tags.any((tag) => _selectedTags.contains(tag))))
+            item.name.toLowerCase().contains(_searchQuery.toLowerCase()) &&
+            (_selectedTags.isEmpty ||
+                item.tags.any((tag) => _selectedTags.contains(tag))))
         .toList();
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -62,23 +62,37 @@ class _MarketplaceState extends State<Marketplace> {
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 10),
-                  children: ['fruit', 'dairy', 'vegetables', 'meal', 'frozen']
+                  children: [
+                    'fruit',
+                    'dairy',
+                    'vegetables',
+                    'meal',
+                    'frozen',
+                    'Original Packaging',
+                    'Organic',
+                    'Canned',
+                    'Vegan',
+                    'Vegetarian',
+                    'Halal',
+                    'Kosher',
+                    'other'
+                  ]
                       .map((tag) => Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5),
-                    child: ChoiceChip(
-                      label: Text(tag),
-                      selected: _selectedTags.contains(tag),
-                      onSelected: (selected) {
-                        setState(() {
-                          if (selected) {
-                            _selectedTags.add(tag);
-                          } else {
-                            _selectedTags.remove(tag);
-                          }
-                        });
-                      },
-                    ),
-                  ))
+                            padding: const EdgeInsets.symmetric(horizontal: 5),
+                            child: ChoiceChip(
+                              label: Text(tag),
+                              selected: _selectedTags.contains(tag),
+                              onSelected: (selected) {
+                                setState(() {
+                                  if (selected) {
+                                    _selectedTags.add(tag);
+                                  } else {
+                                    _selectedTags.remove(tag);
+                                  }
+                                });
+                              },
+                            ),
+                          ))
                       .toList(),
                 ),
               ),
@@ -99,7 +113,6 @@ class _MarketplaceState extends State<Marketplace> {
                             ),
                           ),
                         );
-
                       },
                       child: Card(
                         margin: const EdgeInsets.symmetric(vertical: 10),
@@ -139,7 +152,8 @@ class _MarketplaceState extends State<Marketplace> {
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           item.name,
@@ -151,7 +165,7 @@ class _MarketplaceState extends State<Marketplace> {
                                         const SizedBox(height: 5),
                                         Row(
                                           mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
                                               "£${item.price}",

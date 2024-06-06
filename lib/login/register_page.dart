@@ -19,6 +19,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   String? selectedAccommodation;
+  bool _obscureText = true; // Add this boolean value to track password visibility
 
   String getFlagEmoji(String countryCode) {
     return countryFlags[countryCode] ?? '';
@@ -41,6 +42,12 @@ class _RegisterPageState extends State<RegisterPage> {
     } catch (e) {
       print(e);
     }
+  }
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _obscureText = !_obscureText; // Toggle the boolean value
+    });
   }
 
   @override
@@ -170,8 +177,14 @@ class _RegisterPageState extends State<RegisterPage> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureText ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: _togglePasswordVisibility,
+                  ),
                 ),
-                obscureText: true,
+                obscureText: _obscureText, // Use the boolean value here
               ),
               SizedBox(height: 20),
               ElevatedButton(

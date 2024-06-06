@@ -6,6 +6,7 @@ import 'list_new_item.dart';
 import 'item_detail_page.dart';
 import '../item_provider.dart';
 import '../item_model.dart'; // Import Item model
+import 'package:cloud_firestore/cloud_firestore.dart'; // Add this import
 
 class SellPage extends StatefulWidget {
   final VoidCallback onSubmit;
@@ -35,6 +36,84 @@ class _SellPageState extends State<SellPage> {
     }
   }
 
+  Future<void> _handleAcceptEnquiry(Item item) async {
+    print('Handling accept enquiry for item: ${item.name}');
+    if (item.enquiries.isNotEmpty) {
+      final firstEnquirer = item.enquiries.entries.first;
+      final String enquirerName = firstEnquirer.key;
+      final String enquirerId = firstEnquirer.value;
+
+      print('Enquirer: $enquirerName, ID: $enquirerId');
+
+      // Fetch enquirer's phone number
+      final String? enquirerPhoneNumber = await _getEnquirerPhoneNumber(enquirerId);
+
+      if (enquirerPhoneNumber != null) {
+        // Empty the enquiries queue
+        item.enquiries.clear();
+
+        // Set contact message
+        item.contactMessage = 'Contact $enquirerName at $enquirerPhoneNumber';
+
+        // Update Firestore
+        final DocumentReference itemDoc = FirebaseFirestore.instance.collection('items').doc(item.id);
+        await itemDoc.update(item.toFirestore());
+
+        // Update state to show contact message
+        setState(() {
+          // Item state is already updated before Firestore update
+        });
+
+        print('Updated contact message: ${item.contactMessage}');
+      } else {
+        print('Failed to fetch phone number for enquirer ID: $enquirerId');
+      }
+    } else {
+      print('No enquiries to accept for item: ${item.name}');
+    }
+  }
+
+  Future<void> _handleRemoveEnquiry(Item item) async {
+    print('Handling remove enquiry for item: ${item.name}');
+    await _removeEnquirer(item);
+  }
+
+  Future<void> _removeEnquirer(Item item) async {
+    if (item.enquiries.isNotEmpty) {
+      final firstEnquirer = item.enquiries.entries.first;
+      print('Removing enquirer: ${firstEnquirer.key}');
+      item.enquiries.remove(firstEnquirer.key);
+
+      // Update Firestore
+      final DocumentReference itemDoc = FirebaseFirestore.instance.collection('items').doc(item.id);
+      await itemDoc.update(item.toFirestore());
+
+      // Update state
+      setState(() {});
+    } else {
+      print('No enquiries to remove for item: ${item.name}');
+    }
+  }
+
+  Future<String?> _getEnquirerPhoneNumber(String userId) async {
+    try {
+      print('Fetching phone number for user ID: $userId');
+      final DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+
+      if (userDoc.exists) {
+        final userData = userDoc.data() as Map<String, dynamic>;
+        print('Phone number fetched: ${userData['phone']}');
+        return userData['phone'] as String?;
+      } else {
+        print('User not found for userId: $userId');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching user phone number: $e');
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final itemProvider = Provider.of<ItemProvider>(context);
@@ -46,6 +125,11 @@ class _SellPageState extends State<SellPage> {
                 item.tags.any((tag) => _selectedTags.contains(tag))))
         .toList();
     final screenWidth = MediaQuery.of(context).size.width;
+
+    print('Building UI with items:');
+    for (var item in filteredItems) {
+      print('Item: ${item.name}, Contact Message: ${item.contactMessage}');
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -79,7 +163,21 @@ class _SellPageState extends State<SellPage> {
             child: ListView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 10),
-              children: ['fruit', 'dairy', 'vegetables', 'meal', 'frozen']
+              children: [
+                'fruit',
+                'dairy',
+                'vegetables',
+                'meal',
+                'frozen',
+                'Original Packaging',
+                'Organic',
+                'Canned',
+                'Vegan',
+                'Vegetarian',
+                'Halal',
+                'Kosher',
+                'other'
+              ]
                   .map((tag) => Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 5),
                         child: ChoiceChip(
@@ -105,6 +203,8 @@ class _SellPageState extends State<SellPage> {
               itemCount: filteredItems.length,
               itemBuilder: (context, index) {
                 final item = filteredItems[index];
+                final firstEnquirer = item.enquiries.isNotEmpty ? item.enquiries.entries.first : null;
+
                 return GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -166,8 +266,7 @@ class _SellPageState extends State<SellPage> {
                                     ),
                                     const SizedBox(height: 5),
                                     Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
                                           "£${item.price}",
@@ -186,6 +285,48 @@ class _SellPageState extends State<SellPage> {
                                         ),
                                       ],
                                     ),
+                                    const SizedBox(height: 5),
+                                    if (item.contactMessage == null)
+                                      Text(
+                                        'Enquiries: ${item.enquiries.length}',
+                                        style: TextStyle(
+                                          fontSize: screenWidth * 0.035,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    if (item.contactMessage != null)
+                                      Text(
+                                        item.contactMessage!,
+                                        style: TextStyle(
+                                          fontSize: screenWidth * 0.035,
+                                          color: Colors.green,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    if (firstEnquirer != null && item.contactMessage == null) ...[
+                                      const SizedBox(height: 5),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              'Enquirer: ${firstEnquirer.key}',
+                                              style: TextStyle(
+                                                fontSize: screenWidth * 0.035,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ),
+                                          IconButton(
+                                            icon: Icon(Icons.check, color: Colors.green),
+                                            onPressed: () => _handleAcceptEnquiry(item),
+                                          ),
+                                          IconButton(
+                                            icon: Icon(Icons.close, color: Colors.red),
+                                            onPressed: () => _handleRemoveEnquiry(item),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                     const SizedBox(height: 10),
                                     Wrap(
                                       spacing: 5,

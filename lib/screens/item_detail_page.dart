@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../item_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ItemDetailPage extends StatefulWidget {
   final Item item;
@@ -11,8 +13,118 @@ class ItemDetailPage extends StatefulWidget {
   _ItemDetailPageState createState() => _ItemDetailPageState();
 }
 
-class _ItemDetailPageState extends State<ItemDetailPage> {
+class _ItemDetailPageState extends State<ItemDetailPage> with SingleTickerProviderStateMixin {
   int _currentPage = 0;
+  bool _isEnquirySuccessful = false;
+  bool _isEnquiryError = false;
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+  String _enquiryMessage = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeIn,
+    );
+  }
+
+  Future<String?> getUserNameByItem(Item item) async {
+    try {
+      final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(item.userId)
+          .get();
+
+      if (userDoc.exists) {
+        final userData = userDoc.data() as Map<String, dynamic>;
+        return userData['fullName'] as String?;
+      } else {
+        print('User not found for userId: ${item.userId}');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching user name: $e');
+      return null;
+    }
+  }
+
+  Future<String?> getUserNameById(String userId) async {
+    try {
+      final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+
+      if (userDoc.exists) {
+        final userData = userDoc.data() as Map<String, dynamic>;
+        return userData['fullName'] as String?;
+      } else {
+        print('User not found for userId: $userId');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching user name: $e');
+      return null;
+    }
+  }
+
+  Future<void> _handleEnquiry() async {
+    // Get Current User
+    final FirebaseAuth auth = FirebaseAuth.instance;
+    final user = auth.currentUser;
+    if (user == null) return;
+
+    // Check if the user is trying to enquire their own listing
+    if (widget.item.userId == user.uid) {
+      setState(() {
+        _isEnquirySuccessful = false;
+        _isEnquiryError = true;
+        _enquiryMessage = 'You cannot enquire to your own listing';
+      });
+      _controller.forward();
+      return;
+    }
+
+    setState(() {
+      _isEnquirySuccessful = true;
+      _isEnquiryError = false;
+    });
+
+    final String currentUserId = user.uid;
+    final String? currentUserName = await getUserNameById(currentUserId);
+
+    if (currentUserName != null) {
+      // Add enquiry to the Firestore document
+      final DocumentReference itemDoc =
+          FirebaseFirestore.instance.collection('items').doc(widget.item.id);
+
+      await itemDoc.update({
+        'enquiries.${currentUserName}': currentUserId,
+      });
+
+      String? sellerName = await getUserNameByItem(widget.item);
+
+      setState(() {
+        widget.item.enquiries[currentUserName] = currentUserId;
+        _enquiryMessage =
+            'Enquiry Successful.\nLook out for a text message from ${sellerName ?? 'the seller'}.';
+      });
+
+      _controller.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -185,26 +297,44 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(16.0),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 43, 173, 199),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16.0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                    ),
-                    onPressed: () {
-                      // Handle button press
-                    },
-                    child: const Text(
-                      'Enquire',
-                      style: TextStyle(
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+                  child: _isEnquirySuccessful || _isEnquiryError
+                      ? FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 16.0),
+                            decoration: BoxDecoration(
+                              color: _isEnquiryError ? Colors.red : Color.fromARGB(255, 42, 205, 34),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: Text(
+                              _enquiryMessage,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        )
+                      : ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromARGB(255, 43, 173, 199),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16.0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                          onPressed: _handleEnquiry,
+                          child: const Text(
+                            'Enquire',
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                 ),
               ],
             ),

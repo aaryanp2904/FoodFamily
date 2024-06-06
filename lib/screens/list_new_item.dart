@@ -162,7 +162,9 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
         }
       }
 
-      final newItem = FirebaseFirestore.instance.collection('items').doc(); // Generate a new document reference
+      final newItem = FirebaseFirestore.instance
+          .collection('items')
+          .doc(); // Generate a new document reference
       await newItem.set({
         'id': newItem.id, // Use the document ID
         'name': _nameController.text,
@@ -188,6 +190,7 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
         description: _descriptionController.text,
         tags: _selectedTags,
         userId: FirebaseAuth.instance.currentUser!.uid,
+        enquiries: {}
       ));
 
       if (mounted) {
@@ -315,22 +318,35 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
               const SizedBox(height: 8),
               Wrap(
                 spacing: 10,
-                children:
-                    ['fruit', 'dairy', 'vegetables', 'meal', 'frozen', 'other']
-                        .map((tag) => ChoiceChip(
-                              label: Text(tag),
-                              selected: _selectedTags.contains(tag),
-                              onSelected: (selected) {
-                                setState(() {
-                                  if (selected) {
-                                    _selectedTags.add(tag);
-                                  } else {
-                                    _selectedTags.remove(tag);
-                                  }
-                                });
-                              },
-                            ))
-                        .toList(),
+                children: [
+                  'fruit',
+                  'dairy',
+                  'vegetables',
+                  'meal',
+                  'frozen',
+                  'Original Packaging',
+                  'Organic',
+                  'Canned',
+                  'Vegan',
+                  'Vegetarian',
+                  'Halal',
+                  'Kosher',
+                   'other'
+                ]
+                    .map((tag) => ChoiceChip(
+                          label: Text(tag),
+                          selected: _selectedTags.contains(tag),
+                          onSelected: (selected) {
+                            setState(() {
+                              if (selected) {
+                                _selectedTags.add(tag);
+                              } else {
+                                _selectedTags.remove(tag);
+                              }
+                            });
+                          },
+                        ))
+                    .toList(),
               ),
               const SizedBox(height: 24),
               Center(

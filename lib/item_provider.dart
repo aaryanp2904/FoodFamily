@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'item_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -33,7 +32,9 @@ class ItemProvider with ChangeNotifier {
             expiryDate: data['expiryDate'],
             description: data['description'],
             tags: List<String>.from(data['tags']),
-            userId: user.uid
+            userId: data['userId'],
+            enquiries: Map<String, String>.from(data['enquiries'] ?? {}),
+            contactMessage: data['contactMessage'], // Fetch contactMessage
           );
         }).toList();
       }
@@ -60,6 +61,8 @@ class ItemProvider with ChangeNotifier {
           description: data['description'],
           tags: List<String>.from(data['tags']),
           userId: data['userId'],
+          enquiries: Map<String, String>.from(data['enquiries'] ?? {}),
+          contactMessage: data['contactMessage'], // Fetch contactMessage
         );
       }).toList();
       notifyListeners();

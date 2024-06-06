@@ -10,6 +10,7 @@ class _LoginPageState extends State<LoginPage> {
   final _auth = FirebaseAuth.instance;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool _obscureText = true; // Add this boolean value to track password visibility
 
   void _login() async {
     try {
@@ -21,6 +22,12 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       print(e);
     }
+  }
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _obscureText = !_obscureText; // Toggle the boolean value
+    });
   }
 
   @override
@@ -51,8 +58,14 @@ class _LoginPageState extends State<LoginPage> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureText ? Icons.visibility : Icons.visibility_off,
+                    ),
+                    onPressed: _togglePasswordVisibility,
+                  ),
                 ),
-                obscureText: true,
+                obscureText: _obscureText, // Use the boolean value here
               ),
               SizedBox(height: 20),
               ElevatedButton(
