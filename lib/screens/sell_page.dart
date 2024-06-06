@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_1/screens/item_detail_for_sell_page.dart';
 import 'package:provider/provider.dart';
 import 'list_new_item.dart';
-import 'item_detail_page.dart';
 import '../item_provider.dart';
 import '../item_model.dart'; // Import Item model
 import 'package:cloud_firestore/cloud_firestore.dart'; // Add this import
@@ -15,6 +14,7 @@ class SellPage extends StatefulWidget {
   const SellPage({super.key, required this.onSubmit, required this.isDarkMode});
 
   @override
+  // ignore: library_private_types_in_public_api
   _SellPageState createState() => _SellPageState();
 }
 
@@ -22,7 +22,7 @@ class _SellPageState extends State<SellPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  List<String> _selectedTags = [];
+  final List<String> _selectedTags = [];
 
   @override
   void initState() {
@@ -154,7 +154,7 @@ class _SellPageState extends State<SellPage> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search by name',
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15),
                 ),
@@ -166,7 +166,7 @@ class _SellPageState extends State<SellPage> {
               },
             ),
           ),
-          Container(
+          SizedBox(
             height: 50,
             child: ListView(
               scrollDirection: Axis.horizontal,
@@ -244,7 +244,7 @@ class _SellPageState extends State<SellPage> {
                               Container(
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(15),
-                                  boxShadow: [
+                                  boxShadow: const [
                                     BoxShadow(
                                       color: Colors.black26,
                                       blurRadius: 10,
@@ -382,8 +382,8 @@ class _SellPageState extends State<SellPage> {
             ),
           );
         },
-        child: const Icon(Icons.add, size: 32),
         backgroundColor: Colors.teal,
+        child: const Icon(Icons.add, size: 32),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );

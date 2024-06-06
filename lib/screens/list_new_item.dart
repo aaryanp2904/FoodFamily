@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print, use_build_context_synchronously, library_private_types_in_public_api
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -35,15 +37,13 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
 
     if (source == ImageSource.gallery) {
       final pickedFiles = await picker.pickMultiImage();
-      if (pickedFiles != null) {
-        for (var pickedFile in pickedFiles) {
-          File compressedImage = await _compressImage(File(pickedFile.path));
-          setState(() {
-            _images.add(compressedImage);
-          });
-        }
+      for (var pickedFile in pickedFiles) {
+        File compressedImage = await _compressImage(File(pickedFile.path));
+        setState(() {
+          _images.add(compressedImage);
+        });
       }
-    } else if (source == ImageSource.camera) {
+        } else if (source == ImageSource.camera) {
       bool continueTakingPhotos = true;
 
       while (continueTakingPhotos) {
@@ -156,7 +156,7 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
           print('Upload failed');
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Failed to upload image')));
+                const SnackBar(content: Text('Failed to upload image')));
           }
           return;
         }
@@ -178,7 +178,7 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Item listed successfully')));
+            .showSnackBar(const SnackBar(content: Text('Item listed successfully')));
       }
 
       Provider.of<ItemProvider>(context, listen: false).addItem(Item(
@@ -201,7 +201,7 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
       print(e);
       if (mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('Failed to list item')));
+            .showSnackBar(const SnackBar(content: Text('Failed to list item')));
       }
     }
   }
@@ -352,12 +352,12 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
               Center(
                 child: ElevatedButton(
                   onPressed: _submitItem,
-                  child: const Text('Submit'),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                         vertical: 16, horizontal: 32),
                     textStyle: const TextStyle(fontSize: 16),
                   ),
+                  child: const Text('Submit'),
                 ),
               ),
             ],

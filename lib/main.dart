@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable, use_key_in_widget_constructors
+
 import 'dart:io';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -91,7 +93,7 @@ class MyApp extends StatelessWidget {
 class AuthWrapper extends StatelessWidget {
   final ValueNotifier<bool> isDarkMode;
 
-  AuthWrapper({required this.isDarkMode});
+  const AuthWrapper({required this.isDarkMode});
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +101,7 @@ class AuthWrapper extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(body: Center(child: CircularProgressIndicator()));
         } else if (snapshot.hasData) {
           return FirstPage(
               isDarkMode:

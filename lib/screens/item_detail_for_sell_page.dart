@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../item_model.dart';
@@ -29,7 +31,7 @@ class _ItemDetailForSellPageState extends State<ItemDetailForSellPage> {
           .delete();
       Navigator.of(context).pop(); // Go back to the previous screen
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Listing removed successfully')));
+          const SnackBar(content: Text('Listing removed successfully')));
     } catch (e) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Error removing listing: $e')));
@@ -209,7 +211,7 @@ class _ItemDetailForSellPageState extends State<ItemDetailForSellPage> {
                   padding: const EdgeInsets.all(16.0),
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 43, 173, 199),
+                      backgroundColor: const Color.fromARGB(255, 43, 173, 199),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 16.0),
                       shape: RoundedRectangleBorder(

@@ -1,3 +1,5 @@
+// ignore_for_file: library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../item_provider.dart';
@@ -15,7 +17,7 @@ class Marketplace extends StatefulWidget {
 class _MarketplaceState extends State<Marketplace> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  List<String> _selectedTags = [];
+  final List<String> _selectedTags = [];
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +47,7 @@ class _MarketplaceState extends State<Marketplace> {
                   controller: _searchController,
                   decoration: InputDecoration(
                     hintText: 'Search by name',
-                    prefixIcon: Icon(Icons.search),
+                    prefixIcon: const Icon(Icons.search),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15),
                     ),
@@ -57,7 +59,7 @@ class _MarketplaceState extends State<Marketplace> {
                   },
                 ),
               ),
-              Container(
+              SizedBox(
                 height: 50,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
@@ -131,7 +133,7 @@ class _MarketplaceState extends State<Marketplace> {
                                   Container(
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(15),
-                                      boxShadow: [
+                                      boxShadow: const [
                                         BoxShadow(
                                           color: Colors.black26,
                                           blurRadius: 10,

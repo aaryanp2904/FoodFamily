@@ -1,8 +1,9 @@
+// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
-import 'country_flags.dart';
 
 class ProfilePage extends StatefulWidget {
   final ValueNotifier<bool> isDarkMode;
@@ -20,7 +21,6 @@ class _ProfilePageState extends State<ProfilePage> {
   final _phoneController = TextEditingController();
   final _instagramController = TextEditingController();
   final _emailController = TextEditingController();
-  final _accommodationController = TextEditingController();
   String? selectedAccommodation;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isEditable = false;
@@ -72,7 +72,7 @@ class _ProfilePageState extends State<ProfilePage> {
     if (user != null) {
       _auth.sendPasswordResetEmail(email: user.email!);
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Password reset email sent')));
+          const SnackBar(content: Text('Password reset email sent')));
     }
   }
 
@@ -85,10 +85,10 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile'),
+        title: const Text('Profile'),
         actions: [
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: const Icon(Icons.logout),
             onPressed: _logout,
           ),
         ],
@@ -103,7 +103,7 @@ class _ProfilePageState extends State<ProfilePage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Dark Mode', style: TextStyle(fontSize: 18)),
+                  const Text('Dark Mode', style: TextStyle(fontSize: 18)),
                   ValueListenableBuilder(
                     valueListenable: widget.isDarkMode,
                     builder: (context, isDark, child) {
@@ -117,16 +117,16 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ],
               ),
-              SizedBox(height: 24),
-              Center(
+              const SizedBox(height: 24),
+              const Center(
                 child: Text(
                   'Personal Details',
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
               ),
-              SizedBox(height: 24),
-              Text('Full Name', style: TextStyle(fontSize: 16)),
-              SizedBox(height: 8),
+              const SizedBox(height: 24),
+              const Text('Full Name', style: TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
               TextFormField(
                 controller: _fullNameController,
                 enabled: _isEditable,
@@ -134,12 +134,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
                 ),
               ),
-              SizedBox(height: 16),
-              Text('Phone Number', style: TextStyle(fontSize: 16)),
-              SizedBox(height: 8),
+              const SizedBox(height: 16),
+              const Text('Phone Number', style: TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
               TextFormField(
                 controller: _phoneController,
                 enabled: _isEditable,
@@ -147,14 +147,14 @@ class _ProfilePageState extends State<ProfilePage> {
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
                       ),
                 keyboardType: TextInputType.phone,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               ),
-              SizedBox(height: 16),
-              Text('Instagram', style: TextStyle(fontSize: 16)),
-              SizedBox(height: 8),
+              const SizedBox(height: 16),
+              const Text('Instagram', style: TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
               TextFormField(
                 controller: _instagramController,
                 enabled: _isEditable,
@@ -162,12 +162,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
                 ),
               ),
-              SizedBox(height: 16),
-              Text('Email', style: TextStyle(fontSize: 16)),
-              SizedBox(height: 8),
+              const SizedBox(height: 16),
+              const Text('Email', style: TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
               TextFormField(
                 controller: _emailController,
                 enabled: false,
@@ -175,12 +175,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
                 ),
               ),
-              SizedBox(height: 16),
-              Text('Accommodation', style: TextStyle(fontSize: 16)),
-              SizedBox(height: 8),
+              const SizedBox(height: 16),
+              const Text('Accommodation', style: TextStyle(fontSize: 16)),
+              const SizedBox(height: 8),
               DropdownButtonFormField<String>(
                 value: selectedAccommodation,
                 onChanged: _isEditable
@@ -208,13 +208,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
                 ),
                 disabledHint: selectedAccommodation != null
                     ? Text(selectedAccommodation!)
                     : null,
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               Center(
                 child: ElevatedButton(
                   onPressed: _isEditable ? _saveChanges : () {
@@ -225,11 +225,11 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: Text(_isEditable ? 'Save' : 'Edit Profile'),
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Center(
                 child: ElevatedButton(
                   onPressed: _resetPassword,
-                  child: Text('Reset Password'),
+                  child: const Text('Reset Password'),
                 ),
               ),
             ],

@@ -1,4 +1,4 @@
-import 'dart:io';
+// ignore_for_file: avoid_print
 import 'package:flutter/material.dart';
 import 'item_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
