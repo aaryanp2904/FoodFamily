@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:flutter/material.dart';
+import 'package:flutter_1/screens/kitchen.dart';
 import 'package:flutter_1/screens/marketplace.dart';
 import 'package:flutter_1/screens/profile_page.dart';
 import 'package:flutter_1/screens/sell_page.dart';
@@ -38,7 +39,8 @@ class _FirstPageState extends State<FirstPage> {
         },
         isDarkMode: widget.isDarkMode,
       ),
-      ProfilePage(isDarkMode: widget.isDarkMode),
+      Kitchen(isDarkMode: widget.isDarkMode),
+      ProfilePage(isDarkMode: widget.isDarkMode),// Add the Kitchen page here
     ]);
   }
 
@@ -54,6 +56,10 @@ class _FirstPageState extends State<FirstPage> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentPage,
         onTap: navigateBottomBar,
+        selectedItemColor: Colors.purple, // Set the selected item color to purple
+        unselectedItemColor: Colors.grey,
+        unselectedLabelStyle: TextStyle(color: Colors.grey),
+        showUnselectedLabels: true,// Set the unselected item color to grey
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.shop_2_rounded),
@@ -62,6 +68,10 @@ class _FirstPageState extends State<FirstPage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.sell_rounded),
             label: 'My Listings',
+          ),
+          BottomNavigationBarItem( // Add the new navigation bar item here
+            icon: Icon(Icons.kitchen_rounded),
+            label: 'My Kitchen',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_2_rounded),
