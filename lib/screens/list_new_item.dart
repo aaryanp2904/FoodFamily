@@ -190,7 +190,8 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
         description: _descriptionController.text,
         tags: _selectedTags,
         userId: FirebaseAuth.instance.currentUser!.uid,
-        enquiries: {}
+        enquiries: {},
+        kitchenId: ""
       ));
 
       if (mounted) {

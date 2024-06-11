@@ -7,12 +7,40 @@ import 'package:firebase_auth/firebase_auth.dart';
 class ItemProvider with ChangeNotifier {
   List<Item> _marketplaceItems = [];
   List<Item> _userItems = [];
+  List<Item> _kitchenItems = [];
+  String? _kitchenId;
 
   List<Item> get marketplaceItems => _marketplaceItems;
   List<Item> get userItems => _userItems;
+  String? get kitchenId => _kitchenId;
 
   ItemProvider() {
     fetchItems();
+  }
+
+  Future<void> loadItems(String kitchenId) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('KitchenItems')
+        .where('kitchenId', isEqualTo: kitchenId)
+        .get();
+    _kitchenItems = snapshot.docs.map((doc) => Item.fromFirestore(doc)).toList();
+    _kitchenId = kitchenId;
+    notifyListeners();
+  }
+
+  Future<void> addKitchenItem(Item item) async {
+    final newItemRef = FirebaseFirestore.instance.collection('KitchenItems').doc();
+    await newItemRef.set({
+      'id': newItemRef.id,
+      'name': item.name,
+      'expiryDate': item.expiryDate,
+      'description': item.description,
+      'images': item.photos,
+      'tags': item.tags,
+      'kitchenId': item.kitchenId,
+    });
+    _kitchenItems.add(item);
+    notifyListeners();
   }
 
   Future<void> fetchItems() async {
@@ -34,7 +62,8 @@ class ItemProvider with ChangeNotifier {
             tags: List<String>.from(data['tags']),
             userId: data['userId'],
             enquiries: Map<String, String>.from(data['enquiries'] ?? {}),
-            contactMessage: data['contactMessage'], // Fetch contactMessage
+            contactMessage: data['contactMessage'],
+            kitchenId: ""// Fetch contactMessage
           );
         }).toList();
       }
@@ -62,7 +91,8 @@ class ItemProvider with ChangeNotifier {
           tags: List<String>.from(data['tags']),
           userId: data['userId'],
           enquiries: Map<String, String>.from(data['enquiries'] ?? {}),
-          contactMessage: data['contactMessage'], // Fetch contactMessage
+          contactMessage: data['contactMessage'],
+          kitchenId: ""// Fetch contactMessage
         );
       }).toList();
       notifyListeners();

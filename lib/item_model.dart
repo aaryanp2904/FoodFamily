@@ -11,6 +11,7 @@ class Item {
   final String userId;
   final Map<String, String> enquiries;
   String? contactMessage; // Make this field mutable
+  String kitchenId;
 
   Item({
     required this.id,
@@ -22,6 +23,7 @@ class Item {
     required this.tags,
     required this.userId,
     required this.enquiries,
+    required this.kitchenId,
     this.contactMessage,
   });
 
@@ -35,9 +37,10 @@ class Item {
       expiryDate: data['expiryDate'],
       description: data['description'] ?? "",
       tags: List<String>.from(data['tags']),
-      userId: data['userId'],
+      userId: data['userId'] ?? "",
       enquiries: Map<String, String>.from(data['enquiries'] ?? {}),
       contactMessage: data['contactMessage'],
+      kitchenId: data['kitchenId'],
     );
   }
 
@@ -64,6 +67,7 @@ class Item {
       userId: userId ?? this.userId,
       enquiries: enquiries ?? this.enquiries,
       contactMessage: contactMessage ?? this.contactMessage,
+      kitchenId: kitchenId,
     );
   }
 
@@ -78,6 +82,7 @@ class Item {
       'userId': userId,
       'enquiries': enquiries,
       'contactMessage': contactMessage,
+      'kitchenId': kitchenId,
     };
   }
 }

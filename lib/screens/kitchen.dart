@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'add_kitchen_item_page.dart';
 import '../item_model.dart'; // Import Item model
+import 'invite_user_page.dart';
 
 class Kitchen extends StatefulWidget {
   final ValueNotifier<bool> isDarkMode;
@@ -19,21 +20,176 @@ class _KitchenState extends State<Kitchen> {
   String _searchQuery = '';
   final List<String> _selectedTags = [];
 
+  late String kitchenId;
+  bool _isLoading = true; // Track loading state
+
   @override
   void initState() {
     super.initState();
+    _initializeKitchen();
+  }
+
+  Future<void> _initializeKitchen() async {
+    final user = _auth.currentUser!;
+    final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+
+    if (userDoc.exists && userDoc.data()!.containsKey('kitchenId')) {
+      setState(() {
+        kitchenId = userDoc['kitchenId'];
+        _isLoading = false;
+      });
+    } else {
+      final newKitchenRef = FirebaseFirestore.instance.collection('Kitchens').doc();
+      await newKitchenRef.set({
+        'kitchenId': newKitchenRef.id,
+        'members': [user.uid]
+      });
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'kitchenId': newKitchenRef.id
+      }, SetOptions(merge: true));
+
+      setState(() {
+        kitchenId = newKitchenRef.id;
+        _isLoading = false;
+      });
+    }
+
+    _checkForInvitations(user.uid);
+  }
+
+  Future<void> _checkForInvitations(String userId) async {
+    final invitations = await FirebaseFirestore.instance
+        .collection('invitations')
+        .where('invitedUserId', isEqualTo: userId)
+        .get();
+
+    if (invitations.docs.isNotEmpty) {
+      final invitation = invitations.docs.first;
+      final invitedBy = invitation['invitedBy'];
+      final kitchenId = invitation['kitchenId'];
+
+      final invitedByUser = await FirebaseFirestore.instance.collection('users').doc(invitedBy).get();
+      final invitedByName = invitedByUser['email'];
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Kitchen Invitation'),
+          content: Text('$invitedByName has invited you to join their kitchen.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                invitation.reference.delete();
+                Navigator.of(context).pop();
+              },
+              child: const Text('Decline'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await FirebaseFirestore.instance.collection('users').doc(userId).update({
+                  'kitchenId': kitchenId,
+                });
+                await FirebaseFirestore.instance.collection('Kitchens').doc(kitchenId).update({
+                  'members': FieldValue.arrayUnion([userId])
+                });
+                invitation.reference.delete();
+                setState(() {
+                  this.kitchenId = kitchenId;
+                });
+                Navigator.of(context).pop();
+              },
+              child: const Text('Accept'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  Future<void> _leaveKitchen() async {
+    final user = _auth.currentUser!;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Leave Kitchen'),
+        content: const Text('Are you sure you want to leave the current kitchen?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.of(context).pop(); // Close the dialog
+
+              // Create a new kitchen
+              final newKitchenRef = FirebaseFirestore.instance.collection('Kitchens').doc();
+              await newKitchenRef.set({
+                'kitchenId': newKitchenRef.id,
+                'members': [user.uid]
+              });
+              await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+                'kitchenId': newKitchenRef.id
+              });
+
+              // Remove the user from the current kitchen
+              await FirebaseFirestore.instance.collection('Kitchens').doc(kitchenId).update({
+                'members': FieldValue.arrayRemove([user.uid])
+              });
+
+              setState(() {
+                kitchenId = newKitchenRef.id;
+              });
+            },
+            child: const Text('Leave'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
 
+    // Show a loading indicator while initializing
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('My Kitchen'),
+        ),
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Kitchen',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'My Kitchen',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
         toolbarHeight: 80,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person_add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => InviteUserPage(kitchenId: kitchenId)),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.exit_to_app),
+            onPressed: _leaveKitchen,
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -98,16 +254,18 @@ class _KitchenState extends State<Kitchen> {
             child: StreamBuilder(
               stream: FirebaseFirestore.instance
                   .collection('KitchenItems')
-                  .where('userId', isEqualTo: _auth.currentUser!.uid)
+                  .where('kitchenId', isEqualTo: kitchenId)
                   .snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());
                 }
                 var items = snapshot.data!.docs.map((doc) => Item.fromFirestore(doc)).toList();
-                var filteredItems = items.where((item) =>
+                var filteredItems = items
+                    .where((item) =>
                 item.name.toLowerCase().contains(_searchQuery.toLowerCase()) &&
-                    (_selectedTags.isEmpty || item.tags.any((tag) => _selectedTags.contains(tag)))).toList();
+                    (_selectedTags.isEmpty || item.tags.any((tag) => _selectedTags.contains(tag))))
+                    .toList();
 
                 filteredItems.sort((a, b) {
                   DateTime aExpiry = DateTime.parse(a.expiryDate);
@@ -182,20 +340,22 @@ class _KitchenState extends State<Kitchen> {
                                         const SizedBox(height: 10),
                                         Wrap(
                                           spacing: 5,
-                                          children: item.tags.map((tag) {
-                                            return Chip(
-                                              label: Text(tag),
-                                              backgroundColor:
-                                              widget.isDarkMode.value
-                                                  ? Colors.grey.shade700
-                                                  : Colors.blue.shade100,
-                                            );
-                                          }).toList(),
+                                          children: item.tags.map((tag) => Chip(label: Text(tag))).toList(),
                                         ),
                                       ],
                                     ),
                                   ),
                                 ],
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                item.description,
+                                style: TextStyle(
+                                  fontSize: screenWidth * 0.035,
+                                  color: Colors.grey[700],
+                                ),
+                                maxLines: 3,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),
@@ -213,16 +373,13 @@ class _KitchenState extends State<Kitchen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-                builder: (context) => AddKitchenItemPage(onSubmit: () {
-                  setState(() {});
-                })),
+            MaterialPageRoute(builder: (context) => AddKitchenItemPage(onSubmit: () {
+              setState(() {});
+            }, kitchenId: kitchenId)),
           );
         },
-        backgroundColor: Colors.teal,
-        child: const Icon(Icons.add, size: 32),
+        child: const Icon(Icons.add),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

@@ -1,124 +1,133 @@
-// ignore_for_file: avoid_print, use_build_context_synchronously, library_private_types_in_public_api
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-import '../item_provider.dart';
-import '../item_model.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io';
 
 class AddKitchenItemPage extends StatefulWidget {
   final VoidCallback onSubmit;
+  final String kitchenId;
 
-  const AddKitchenItemPage({super.key, required this.onSubmit});
+  const AddKitchenItemPage({super.key, required this.kitchenId, required this.onSubmit});
 
   @override
   _AddKitchenItemPageState createState() => _AddKitchenItemPageState();
 }
 
 class _AddKitchenItemPageState extends State<AddKitchenItemPage> {
-  final List<File> _images = [];
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _expiryDateController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final List<String> _selectedTags = [];
+  final List<File> _images = [];
+  final List<XFile> _pickedFiles = []; // To store the XFile objects
+  bool _showError = false;
+  String _errorMessage = '';
 
-  Future<void> _pickImage(ImageSource source) async {
+  final List<String> _tags = [
+    'fruit',
+    'dairy',
+    'vegetables',
+    'meal',
+    'frozen',
+    'Original Packaging',
+    'Organic',
+    'Canned',
+    'Vegan',
+    'Vegetarian',
+    'Halal',
+    'Kosher',
+    'other'
+  ];
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _expiryDateController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickImage() async {
     final picker = ImagePicker();
-
-    if (source == ImageSource.gallery) {
-      final pickedFiles = await picker.pickMultiImage();
-      for (var pickedFile in pickedFiles) {
-        File compressedImage = await _compressImage(File(pickedFile.path));
-        setState(() {
-          _images.add(compressedImage);
-        });
-      }
-    } else if (source == ImageSource.camera) {
-      bool continueTakingPhotos = true;
-
-      while (continueTakingPhotos) {
-        final pickedFile = await picker.pickImage(source: source);
-        if (pickedFile != null) {
-          File compressedImage = await _compressImage(File(pickedFile.path));
-          setState(() {
-            _images.add(compressedImage);
-          });
-        } else {
-          continueTakingPhotos = false;
-        }
-
-        continueTakingPhotos = await _showContinueTakingPhotosDialog();
-      }
-    }
-  }
-
-  Future<File> _compressImage(File file) async {
-    final dir = await getTemporaryDirectory();
-    final targetPath =
-        "${dir.absolute.path}/${DateTime.now().millisecondsSinceEpoch}.jpg";
-
-    var result = await FlutterImageCompress.compressAndGetFile(
-      file.absolute.path,
-      targetPath,
-      quality: 70,
-    );
-
-    if (result != null) {
-      return File(result.path);
-    } else {
-      return file;
-    }
-  }
-
-  Future<bool> _showContinueTakingPhotosDialog() async {
-    return await showDialog(
+    showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Continue Taking Photos?'),
-          content: const Text('Would you like to take another photo?'),
-          actions: [
-            TextButton(
-              child: const Text('No'),
-              onPressed: () {
-                Navigator.of(context).pop(false);
+      builder: (context) => AlertDialog(
+        title: const Text('Select Image Source'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_album),
+              title: const Text('Gallery'),
+              onTap: () async {
+                final pickedFiles = await picker.pickMultiImage();
+                if (pickedFiles.isNotEmpty) {
+                  setState(() {
+                    for (var pickedFile in pickedFiles) {
+                      _pickedFiles.add(pickedFile); // Add pickedFile to the list
+                      _images.add(File(pickedFile.path));
+                    }
+                  });
+                }
+                Navigator.of(context).pop();
               },
             ),
-            TextButton(
-              child: const Text('Yes'),
-              onPressed: () {
-                Navigator.of(context).pop(true);
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Camera'),
+              onTap: () async {
+                final pickedFile = await picker.pickImage(source: ImageSource.camera);
+                if (pickedFile != null) {
+                  setState(() {
+                    _pickedFiles.add(pickedFile); // Add pickedFile to the list
+                    _images.add(File(pickedFile.path));
+                  });
+                }
+                Navigator.of(context).pop();
               },
             ),
           ],
-        );
-      },
-    ) ??
-        false;
+        ),
+      ),
+    );
   }
 
-  Future<void> _selectDate(BuildContext context) async {
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
-    );
-    if (pickedDate != null) {
-      setState(() {
-        _expiryDateController.text =
-            DateFormat('yyyy-MM-dd').format(pickedDate);
-      });
+  Future<List<String>> _uploadImages() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return [];
     }
+
+    final userId = user.uid;
+    final List<String> imageUrls = [];
+
+    for (var image in _pickedFiles) {
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}_${image.name}';
+      final destination = 'images/$userId/$fileName';
+
+      if (kIsWeb) {
+        // Uploading image from web
+        final bytes = await image.readAsBytes();
+        final ref = FirebaseStorage.instance.ref(destination);
+        final uploadTask = ref.putData(bytes);
+        final snapshot = await uploadTask.whenComplete(() {});
+        final downloadUrl = await snapshot.ref.getDownloadURL();
+        imageUrls.add(downloadUrl);
+      } else {
+        // Uploading image from mobile
+        final ref = FirebaseStorage.instance.ref(destination);
+        final uploadTask = ref.putFile(File(image.path));
+        final snapshot = await uploadTask.whenComplete(() {});
+        final downloadUrl = await snapshot.ref.getDownloadURL();
+        imageUrls.add(downloadUrl);
+      }
+    }
+
+    return imageUrls;
   }
 
   void _submitItem() async {
@@ -126,68 +135,39 @@ class _AddKitchenItemPageState extends State<AddKitchenItemPage> {
         _images.isEmpty ||
         _expiryDateController.text.isEmpty ||
         _selectedTags.isEmpty) {
-      // Show an error message or handle the validation as needed
-      showDialog(
-        context: context,
-        builder: (context) => const AlertDialog(
-          title: Text('Missing Fields'),
-          content: Text(
-              'Make sure to fill out ALL fields, including photo and tags.'),
-        ),
-      );
+      setState(() {
+        _showError = true;
+        _errorMessage = 'Please fill out all fields and select at least one image and tag.';
+      });
       return;
     }
 
     try {
-      List<String> imageUrls = [];
-      for (var image in _images) {
-        String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-        Reference reference =
-        FirebaseStorage.instance.ref().child('kitchenItems/$fileName');
-        UploadTask uploadTask = reference.putFile(image);
-        TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
-        if (taskSnapshot.state == TaskState.success) {
-          String downloadUrl = await taskSnapshot.ref.getDownloadURL();
-          imageUrls.add(downloadUrl);
-          print('Upload successful: $downloadUrl');
-        } else {
-          print('Upload failed');
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Failed to upload image')));
-          }
-          return;
-        }
-      }
+      List<String> imageUrls = await _uploadImages();
 
       final newItem = FirebaseFirestore.instance
           .collection('KitchenItems')
           .doc(); // Generate a new document reference
       await newItem.set({
+        'userId': FirebaseAuth.instance.currentUser?.uid,
         'id': newItem.id, // Use the document ID
         'name': _nameController.text,
         'expiryDate': _expiryDateController.text,
         'description': _descriptionController.text,
         'images': imageUrls,
         'tags': _selectedTags,
-        'userId': FirebaseAuth.instance.currentUser!.uid,
+        'kitchenId': widget.kitchenId,
       });
 
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Item added to kitchen successfully')));
-      }
+      widget.onSubmit();
 
-      if (mounted) {
-        Navigator.pop(context);
-        widget.onSubmit();
-      }
+      Navigator.pop(context);
     } catch (e) {
-      print(e);
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Failed to add item to kitchen')));
-      }
+      print('Error adding item: $e');
+      setState(() {
+        _showError = true;
+        _errorMessage = 'An error occurred while adding the item. Please try again.';
+      });
     }
   }
 
@@ -195,7 +175,7 @@ class _AddKitchenItemPageState extends State<AddKitchenItemPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Item to Kitchen'),
+        title: const Text('Add Item', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: Padding(
@@ -205,11 +185,9 @@ class _AddKitchenItemPageState extends State<AddKitchenItemPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ElevatedButton.icon(
-                onPressed: () {
-                  _showPicker(context);
-                },
+                onPressed: _pickImage,
                 icon: const Icon(Icons.upload_file),
-                label: const Text('Upload/Take Photo (*)'),
+                label: const Text('Pick Images (*)'),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16.0),
                   textStyle: const TextStyle(fontSize: 16),
@@ -239,7 +217,7 @@ class _AddKitchenItemPageState extends State<AddKitchenItemPage> {
                 }).toList(),
               ),
               const SizedBox(height: 16),
-              const Text('Item Name (*)'),
+              const Text('Name (*)'),
               const SizedBox(height: 8),
               TextField(
                 controller: _nameController,
@@ -262,9 +240,21 @@ class _AddKitchenItemPageState extends State<AddKitchenItemPage> {
                   suffixIcon: Icon(Icons.calendar_today),
                   hintText: 'Select expiry date',
                 ),
+                readOnly: true,
                 onTap: () async {
-                  FocusScope.of(context).requestFocus(FocusNode());
-                  await _selectDate(context);
+                  DateTime? pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime(2101),
+                  );
+
+                  if (pickedDate != null) {
+                    String formattedDate = DateFormat('yyyy-MM-dd').format(pickedDate);
+                    setState(() {
+                      _expiryDateController.text = formattedDate;
+                    });
+                  }
                 },
               ),
               const SizedBox(height: 16),
@@ -285,35 +275,21 @@ class _AddKitchenItemPageState extends State<AddKitchenItemPage> {
               const SizedBox(height: 8),
               Wrap(
                 spacing: 10,
-                children: [
-                  'fruit',
-                  'dairy',
-                  'vegetables',
-                  'meal',
-                  'frozen',
-                  'Original Packaging',
-                  'Organic',
-                  'Canned',
-                  'Vegan',
-                  'Vegetarian',
-                  'Halal',
-                  'Kosher',
-                  'other'
-                ]
-                    .map((tag) => ChoiceChip(
-                  label: Text(tag),
-                  selected: _selectedTags.contains(tag),
-                  onSelected: (selected) {
-                    setState(() {
-                      if (selected) {
-                        _selectedTags.add(tag);
-                      } else {
-                        _selectedTags.remove(tag);
-                      }
-                    });
-                  },
-                ))
-                    .toList(),
+                children: _tags.map((tag) {
+                  return ChoiceChip(
+                    label: Text(tag),
+                    selected: _selectedTags.contains(tag),
+                    onSelected: (selected) {
+                      setState(() {
+                        if (selected) {
+                          _selectedTags.add(tag);
+                        } else {
+                          _selectedTags.remove(tag);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
               ),
               const SizedBox(height: 24),
               Center(
@@ -322,45 +298,25 @@ class _AddKitchenItemPageState extends State<AddKitchenItemPage> {
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                         vertical: 16, horizontal: 32),
-                    textStyle: const TextStyle(fontSize: 16),
+                    textStyle: const TextStyle(fontSize: 18),
                   ),
-                  child: const Text('Submit'),
+                  child: const Text('Add Item'),
                 ),
               ),
+              if (_showError)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Center(
+                    child: Text(
+                      _errorMessage,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  void _showPicker(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext bc) {
-        return SafeArea(
-          child: Wrap(
-            children: <Widget>[
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text('Photo Library'),
-                onTap: () {
-                  _pickImage(ImageSource.gallery);
-                  Navigator.of(context).pop();
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_camera),
-                title: const Text('Camera'),
-                onTap: () {
-                  _pickImage(ImageSource.camera);
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

@@ -14,6 +14,8 @@ import 'screens/sell_page.dart';
 import 'screens/profile_page.dart';
 import 'login/login_page.dart';
 import 'login/register_page.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -113,5 +115,26 @@ class AuthWrapper extends StatelessWidget {
         }
       },
     );
+  }
+}
+
+Future<void> initializeUser() async {
+  final user = FirebaseAuth.instance.currentUser;
+
+  if (user != null) {
+    final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+    if (!userDoc.exists) {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'email': user.email,
+        'kitchenId': '', // Initialize with empty string or create a new kitchen
+      });
+    } else {
+      // Ensure kitchenId exists in the document
+      if (!userDoc.data()!.containsKey('kitchenId')) {
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).update({
+          'kitchenId': '', // Initialize with empty string or create a new kitchen
+        });
+      }
+    }
   }
 }
