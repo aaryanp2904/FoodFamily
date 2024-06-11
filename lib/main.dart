@@ -1,11 +1,9 @@
 // ignore_for_file: must_be_immutable, use_key_in_widget_constructors
 
 import 'dart:io';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_1/screens/kitchen.dart';
 import 'package:provider/provider.dart';
 import 'item_provider.dart';
 import 'screens/first_page.dart';
@@ -14,6 +12,14 @@ import 'screens/sell_page.dart';
 import 'screens/profile_page.dart';
 import 'login/login_page.dart';
 import 'login/register_page.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'screens/kitchen.dart';
+import 'screens/list_new_item.dart';
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("Handling a background message: ${message.messageId}");
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +35,7 @@ void main() async {
             messagingSenderId: "1001319224053",
             appId: "1:1001319224053:web:b2761e88aae5a36cc56bbc"));
   }
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   runApp(
     MultiProvider(
@@ -40,24 +47,53 @@ void main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
-  MyApp({super.key});
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
 
-  // Create a ValueNotifier to manage the theme state
-  final ValueNotifier<bool> _isDarkMode = ValueNotifier(false);
+class _MyAppState extends State<MyApp> {
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
-  ThemeData dark = ThemeData(
-    textTheme: Typography.whiteCupertino,
-    brightness: Brightness.dark,
-    useMaterial3: true,
-  );
+  @override
+  void initState() {
+    super.initState();
+    _firebaseMessaging.requestPermission();
 
-  ThemeData light = ThemeData(
-    primaryColor: Colors.white,
-    textTheme: Typography.blackCupertino,
-    brightness: Brightness.light,
-    useMaterial3: true,
-  );
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      print(
+          'Received message while in foreground: ${message.notification?.body}');
+      // Handle the message and show a notification
+      if (message.notification != null) {
+        _showNotification(message.notification!);
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('Message clicked!');
+      // Handle the message
+    });
+  }
+
+  void _showNotification(RemoteNotification notification) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(notification.title ?? 'Notification'),
+          content: Text(notification.body ?? 'You have a new message.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,13 +119,29 @@ class MyApp extends StatelessWidget {
                   ),
               '/marketplace': (context) => Marketplace(isDarkMode: _isDarkMode),
               '/profile': (context) => ProfilePage(isDarkMode: _isDarkMode),
-              '/kitchen': (context) => Kitchen(isDarkMode: _isDarkMode,)
+              '/kitchen': (context) => Kitchen(isDarkMode: _isDarkMode),
+              '/list_new_item': (context) => ListNewItemPage(onSubmit: () {}),
             },
           );
         },
       ),
     );
   }
+
+  final ValueNotifier<bool> _isDarkMode = ValueNotifier(false);
+
+  ThemeData get dark => ThemeData(
+        textTheme: Typography.whiteCupertino,
+        brightness: Brightness.dark,
+        useMaterial3: true,
+      );
+
+  ThemeData get light => ThemeData(
+        primaryColor: Colors.white,
+        textTheme: Typography.blackCupertino,
+        brightness: Brightness.light,
+        useMaterial3: true,
+      );
 }
 
 class AuthWrapper extends StatelessWidget {
@@ -103,7 +155,8 @@ class AuthWrapper extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
         } else if (snapshot.hasData) {
           return FirstPage(
               isDarkMode:

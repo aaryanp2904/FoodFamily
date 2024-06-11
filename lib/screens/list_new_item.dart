@@ -14,6 +14,8 @@ import 'package:provider/provider.dart';
 import '../item_provider.dart';
 import '../item_model.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ListNewItemPage extends StatefulWidget {
   final VoidCallback onSubmit;
@@ -43,7 +45,7 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
           _images.add(compressedImage);
         });
       }
-        } else if (source == ImageSource.camera) {
+    } else if (source == ImageSource.camera) {
       bool continueTakingPhotos = true;
 
       while (continueTakingPhotos) {
@@ -177,21 +179,20 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Item listed successfully')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Item listed successfully')));
       }
 
       Provider.of<ItemProvider>(context, listen: false).addItem(Item(
-        id: newItem.id,
-        name: _nameController.text,
-        photos: imageUrls,
-        price: _priceController.text,
-        expiryDate: _expiryDateController.text,
-        description: _descriptionController.text,
-        tags: _selectedTags,
-        userId: FirebaseAuth.instance.currentUser!.uid,
-        enquiries: {}
-      ));
+          id: newItem.id,
+          name: _nameController.text,
+          photos: imageUrls,
+          price: _priceController.text,
+          expiryDate: _expiryDateController.text,
+          description: _descriptionController.text,
+          tags: _selectedTags,
+          userId: FirebaseAuth.instance.currentUser!.uid,
+          enquiries: {}));
 
       if (mounted) {
         Navigator.pop(context);
@@ -203,6 +204,26 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('Failed to list item')));
       }
+    }
+  }
+
+  void _sendEnquiryNotification(String sellerToken) async {
+    final response = await http.post(
+      Uri.parse('https://your-backend-api.com/send-notification'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{
+        'token': sellerToken,
+        'title': 'New Enquiry',
+        'body': 'Someone has enquired about your item.',
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      print('Notification sent successfully');
+    } else {
+      print('Failed to send notification');
     }
   }
 
@@ -331,7 +352,7 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
                   'Vegetarian',
                   'Halal',
                   'Kosher',
-                   'other'
+                  'other'
                 ]
                     .map((tag) => ChoiceChip(
                           label: Text(tag),
@@ -358,6 +379,22 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
                     textStyle: const TextStyle(fontSize: 16),
                   ),
                   child: const Text('Submit'),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Fetch seller token from the database (this is just a placeholder)
+                    String sellerToken = 'SELLER_DEVICE_TOKEN';
+                    _sendEnquiryNotification(sellerToken);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16, horizontal: 32),
+                    textStyle: const TextStyle(fontSize: 16),
+                  ),
+                  child: const Text('Enquire'),
                 ),
               ),
             ],
