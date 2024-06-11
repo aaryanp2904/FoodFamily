@@ -14,6 +14,8 @@ import 'package:provider/provider.dart';
 import '../item_provider.dart';
 import '../item_model.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ListNewItemPage extends StatefulWidget {
   final VoidCallback onSubmit;
@@ -43,7 +45,7 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
           _images.add(compressedImage);
         });
       }
-        } else if (source == ImageSource.camera) {
+    } else if (source == ImageSource.camera) {
       bool continueTakingPhotos = true;
 
       while (continueTakingPhotos) {
@@ -177,8 +179,8 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
       });
 
       if (mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Item listed successfully')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Item listed successfully')));
       }
 
       Provider.of<ItemProvider>(context, listen: false).addItem(Item(
@@ -204,6 +206,36 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('Failed to list item')));
       }
+    }
+  }
+
+  void _sendEnquiryNotification(String sellerToken) async {
+    final String serverKey =
+        'YOUR_FCM_SERVER_KEY'; // Replace with your FCM server key
+    final response = await http.post(
+      Uri.parse('https://fcm.googleapis.com/fcm/send'),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'key=$serverKey',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'to': sellerToken,
+        'notification': <String, dynamic>{
+          'title': 'New Enquiry',
+          'body': 'Someone has enquired about your item.',
+        },
+        'data': <String, dynamic>{
+          'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+          'id': '1',
+          'status': 'done',
+        },
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      print('Notification sent successfully');
+    } else {
+      print('Failed to send notification');
     }
   }
 
@@ -332,7 +364,7 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
                   'Vegetarian',
                   'Halal',
                   'Kosher',
-                   'other'
+                  'other'
                 ]
                     .map((tag) => ChoiceChip(
                           label: Text(tag),
@@ -359,6 +391,37 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
                     textStyle: const TextStyle(fontSize: 16),
                   ),
                   child: const Text('Submit'),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    // Fetch seller token from the database (this is just a placeholder)
+                    final sellerId =
+                        'SELLER_USER_ID'; // Get the seller's user ID
+                    final sellerDoc = await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(sellerId)
+                        .get();
+                    if (sellerDoc.exists) {
+                      final sellerToken = sellerDoc.data()?[
+                          'token']; // Assuming token is stored in the 'token' field
+                      if (sellerToken != null) {
+                        _sendEnquiryNotification(sellerToken);
+                      } else {
+                        print('Seller token not found');
+                      }
+                    } else {
+                      print('Seller not found');
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16, horizontal: 32),
+                    textStyle: const TextStyle(fontSize: 16),
+                  ),
+                  child: const Text('Enquire'),
                 ),
               ),
             ],

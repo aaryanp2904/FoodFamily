@@ -1,14 +1,15 @@
-// ignore_for_file: library_private_types_in_public_api
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart'; // Import url_launcher package
+
 import '../item_provider.dart';
 import 'item_detail_page.dart';
+import 'map_page.dart'; // Import the MapPage
 
 class Marketplace extends StatefulWidget {
   final ValueNotifier<bool> isDarkMode;
 
-  const Marketplace({super.key, required this.isDarkMode});
+  const Marketplace({Key? key, required this.isDarkMode}) : super(key: key);
 
   @override
   _MarketplaceState createState() => _MarketplaceState();
@@ -35,6 +36,17 @@ class _MarketplaceState extends State<Marketplace> {
       appBar: AppBar(
         title: const Text('Marketplace'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.map),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => MapPage()),
+              );
+            },
+          ),
+        ],
       ),
       body: ValueListenableBuilder<bool>(
         valueListenable: widget.isDarkMode,
