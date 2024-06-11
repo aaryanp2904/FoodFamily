@@ -208,15 +208,25 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
   }
 
   void _sendEnquiryNotification(String sellerToken) async {
+    final String serverKey =
+        'YOUR_FCM_SERVER_KEY'; // Replace with your FCM server key
     final response = await http.post(
-      Uri.parse('https://your-backend-api.com/send-notification'),
+      Uri.parse('https://fcm.googleapis.com/fcm/send'),
       headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
+        'Content-Type': 'application/json',
+        'Authorization': 'key=$serverKey',
       },
-      body: jsonEncode(<String, String>{
-        'token': sellerToken,
-        'title': 'New Enquiry',
-        'body': 'Someone has enquired about your item.',
+      body: jsonEncode(<String, dynamic>{
+        'to': sellerToken,
+        'notification': <String, dynamic>{
+          'title': 'New Enquiry',
+          'body': 'Someone has enquired about your item.',
+        },
+        'data': <String, dynamic>{
+          'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+          'id': '1',
+          'status': 'done',
+        },
       }),
     );
 
@@ -384,10 +394,25 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
               const SizedBox(height: 24),
               Center(
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     // Fetch seller token from the database (this is just a placeholder)
-                    String sellerToken = 'SELLER_DEVICE_TOKEN';
-                    _sendEnquiryNotification(sellerToken);
+                    final sellerId =
+                        'SELLER_USER_ID'; // Get the seller's user ID
+                    final sellerDoc = await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(sellerId)
+                        .get();
+                    if (sellerDoc.exists) {
+                      final sellerToken = sellerDoc.data()?[
+                          'token']; // Assuming token is stored in the 'token' field
+                      if (sellerToken != null) {
+                        _sendEnquiryNotification(sellerToken);
+                      } else {
+                        print('Seller token not found');
+                      }
+                    } else {
+                      print('Seller not found');
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(

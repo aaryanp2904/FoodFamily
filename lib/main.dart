@@ -15,6 +15,7 @@ import 'login/register_page.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'screens/kitchen.dart';
 import 'screens/list_new_item.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -73,6 +74,24 @@ class _MyAppState extends State<MyApp> {
       print('Message clicked!');
       // Handle the message
     });
+
+    _firebaseMessaging.getToken().then((token) {
+      if (token != null) {
+        saveTokenToDatabase(token);
+      }
+    });
+  }
+
+  void saveTokenToDatabase(String token) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({
+        'token': token,
+      });
+    }
   }
 
   void _showNotification(RemoteNotification notification) {
