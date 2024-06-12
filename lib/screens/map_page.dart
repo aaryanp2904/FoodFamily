@@ -1,5 +1,8 @@
+// map_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'other_marketplace.dart';
 
 class MapPage extends StatefulWidget {
   const MapPage({Key? key}) : super(key: key);
@@ -9,35 +12,32 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  // Define LatLng for each location
   final Map<String, LatLng> locations = {
-    'Beit Quad': LatLng(51.4984, -0.1779),
-    'Gabor Hall': LatLng(51.5001, -0.1759),
-    'Linstead Hall': LatLng(51.5004, -0.1761),
-    'Wilkinson Hall': LatLng(51.5003, -0.1768),
-    'Kemp Porter Buildings': LatLng(51.5099, -0.2699),
-    'Falmouth Hall': LatLng(51.4978, -0.1770),
-    'Keogh Hall': LatLng(51.4975, -0.1757),
-    'Selkirk Hall': LatLng(51.4974, -0.1756),
-    'Tizard Hall': LatLng(51.4971, -0.1753),
-    'Wilson House': LatLng(51.5143, -0.1704),
-    'Woodward Buildings': LatLng(51.5131, -0.2704),
+    'Beit Quad': const LatLng(51.4984, -0.1779),
+    'Gabor Hall': const LatLng(51.5001, -0.1759),
+    'Linstead Hall': const LatLng(51.5004, -0.1761),
+    'Wilkinson Hall': const LatLng(51.5003, -0.1768),
+    'Kemp Porter Buildings': const LatLng(51.5099, -0.2699),
+    'Falmouth Hall': const LatLng(51.4978, -0.1770),
+    'Keogh Hall': const LatLng(51.4975, -0.1757),
+    'Selkirk Hall': const LatLng(51.4974, -0.1756),
+    'Tizard Hall': const LatLng(51.4971, -0.1753),
+    'Wilson House': const LatLng(51.5143, -0.1704),
+    'Woodward Buildings': const LatLng(51.5131, -0.2704),
   };
 
-  // Initial camera position
-  CameraPosition _initialCameraPosition = CameraPosition(
+  CameraPosition _initialCameraPosition = const CameraPosition(
     target: LatLng(51.4984, -0.1779),
     zoom: 14,
   );
 
-  // Google Maps Controller
   late GoogleMapController _controller;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Map'),
+        title: const Text('Map'),
       ),
       body: GoogleMap(
         initialCameraPosition: _initialCameraPosition,
@@ -45,12 +45,24 @@ class _MapPageState extends State<MapPage> {
         onMapCreated: (GoogleMapController controller) {
           _controller = controller;
         },
-        markers: locations.keys
-            .map((location) => Marker(
-                  markerId: MarkerId(location),
-                  position: locations[location]!,
+        markers: locations.entries
+            .map((entry) => Marker(
+                  markerId: MarkerId(entry.key),
+                  position: entry.value,
                   infoWindow: InfoWindow(
-                    title: location,
+                    title: entry.key,
+                    snippet: 'Click to view marketplace',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => OtherMarketplace(
+                            isDarkMode: ValueNotifier(false), // Provide your ValueNotifier instance for dark mode
+                            accommodation: entry.key,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ))
             .toSet(),
