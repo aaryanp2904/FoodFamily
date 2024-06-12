@@ -63,7 +63,8 @@ class ItemProvider with ChangeNotifier {
             userId: data['userId'],
             enquiries: Map<String, String>.from(data['enquiries'] ?? {}),
             contactMessage: data['contactMessage'],
-            kitchenId: ""// Fetch contactMessage
+            kitchenId: "",
+            accommodation: data['accommodation']
           );
         }).toList();
       }
@@ -92,7 +93,8 @@ class ItemProvider with ChangeNotifier {
           userId: data['userId'],
           enquiries: Map<String, String>.from(data['enquiries'] ?? {}),
           contactMessage: data['contactMessage'],
-          kitchenId: ""// Fetch contactMessage
+          kitchenId: "",
+          accommodation: data['accommodation']
         );
       }).toList();
       notifyListeners();

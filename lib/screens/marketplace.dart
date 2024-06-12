@@ -1,10 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart'; // Import url_launcher package
+import 'package:url_launcher/url_launcher.dart';
 
 import '../item_provider.dart';
 import 'item_detail_page.dart';
-import 'map_page.dart'; // Import the MapPage
+import 'map_page.dart';
 
 class Marketplace extends StatefulWidget {
   final ValueNotifier<bool> isDarkMode;
@@ -19,6 +21,28 @@ class _MarketplaceState extends State<Marketplace> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   final List<String> _selectedTags = [];
+  String? _userAccommodation;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserAccommodation();
+  }
+
+  Future<void> _loadUserAccommodation() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      if (doc.exists) {
+        final data = doc.data();
+        if (data != null) {
+          setState(() {
+            _userAccommodation = data['accommodation'];
+          });
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +52,8 @@ class _MarketplaceState extends State<Marketplace> {
         .where((item) =>
             item.name.toLowerCase().contains(_searchQuery.toLowerCase()) &&
             (_selectedTags.isEmpty ||
-                item.tags.any((tag) => _selectedTags.contains(tag))))
+                item.tags.any((tag) => _selectedTags.contains(tag))) &&
+            (_userAccommodation == null || item.accommodation == _userAccommodation))
         .toList();
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -38,11 +63,11 @@ class _MarketplaceState extends State<Marketplace> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.map),
+            icon: const Icon(Icons.map),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => MapPage()),
+                MaterialPageRoute(builder: (context) => const MapPage()),
               );
             },
           ),
@@ -90,24 +115,22 @@ class _MarketplaceState extends State<Marketplace> {
                     'Halal',
                     'Kosher',
                     'other'
-                  ]
-                      .map((tag) => Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 5),
-                            child: ChoiceChip(
-                              label: Text(tag),
-                              selected: _selectedTags.contains(tag),
-                              onSelected: (selected) {
-                                setState(() {
-                                  if (selected) {
-                                    _selectedTags.add(tag);
-                                  } else {
-                                    _selectedTags.remove(tag);
-                                  }
-                                });
-                              },
-                            ),
-                          ))
-                      .toList(),
+                  ].map((tag) => Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5),
+                        child: ChoiceChip(
+                          label: Text(tag),
+                          selected: _selectedTags.contains(tag),
+                          onSelected: (selected) {
+                            setState(() {
+                              if (selected) {
+                                _selectedTags.add(tag);
+                              } else {
+                                _selectedTags.remove(tag);
+                              }
+                            });
+                          },
+                        ),
+                      )).toList(),
                 ),
               ),
               Expanded(
@@ -156,7 +179,7 @@ class _MarketplaceState extends State<Marketplace> {
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(15),
                                       child: Image.network(
-                                        item.photos[0], // Use URL directly
+                                        item.photos[0],
                                         width: screenWidth * 0.4,
                                         height: screenWidth * 0.4,
                                         fit: BoxFit.cover,
@@ -166,8 +189,7 @@ class _MarketplaceState extends State<Marketplace> {
                                   const SizedBox(width: 10),
                                   Expanded(
                                     child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           item.name,
@@ -178,8 +200,7 @@ class _MarketplaceState extends State<Marketplace> {
                                         ),
                                         const SizedBox(height: 5),
                                         Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text(
                                               "£${item.price}",

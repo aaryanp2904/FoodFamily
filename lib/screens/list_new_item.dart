@@ -33,6 +33,28 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
   final TextEditingController _expiryDateController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final List<String> _selectedTags = [];
+  String? _userAccommodation;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserAccommodation();
+  }
+
+  Future<void> _loadUserAccommodation() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      if (doc.exists) {
+        final data = doc.data();
+        if (data != null) {
+          setState(() {
+            _userAccommodation = data['accommodation'];
+          });
+        }
+      }
+    }
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     final picker = ImagePicker();
@@ -176,6 +198,7 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
         'images': imageUrls,
         'tags': _selectedTags,
         'userId': FirebaseAuth.instance.currentUser!.uid,
+        'accommodation': _userAccommodation,
       });
 
       if (mounted) {
@@ -184,17 +207,17 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
       }
 
       Provider.of<ItemProvider>(context, listen: false).addItem(Item(
-        id: newItem.id,
-        name: _nameController.text,
-        photos: imageUrls,
-        price: _priceController.text,
-        expiryDate: _expiryDateController.text,
-        description: _descriptionController.text,
-        tags: _selectedTags,
-        userId: FirebaseAuth.instance.currentUser!.uid,
-        enquiries: {},
-        kitchenId: ""
-      ));
+          id: newItem.id,
+          name: _nameController.text,
+          photos: imageUrls,
+          price: _priceController.text,
+          expiryDate: _expiryDateController.text,
+          description: _descriptionController.text,
+          tags: _selectedTags,
+          userId: FirebaseAuth.instance.currentUser!.uid,
+          accommodation: _userAccommodation!,
+          enquiries: {},
+          kitchenId: "",));
 
       if (mounted) {
         Navigator.pop(context);
