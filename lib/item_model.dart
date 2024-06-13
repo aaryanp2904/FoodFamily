@@ -42,7 +42,7 @@ class Item {
       userId: data['userId'] ?? "",
       enquiries: Map<String, String>.from(data['enquiries'] ?? {}),
       contactMessage: data['contactMessage'],
-      accommodation: data['accommodation'],
+      accommodation: data['accommodation'] ?? "",
       kitchenId: data['kitchenId'],
     );
   }

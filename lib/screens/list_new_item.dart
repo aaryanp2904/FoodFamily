@@ -19,8 +19,22 @@ import 'dart:convert';
 
 class ListNewItemPage extends StatefulWidget {
   final VoidCallback onSubmit;
+  final Item item;
 
-  const ListNewItemPage({super.key, required this.onSubmit});
+  ListNewItemPage({super.key, required this.onSubmit, Item? item})
+      : item = item ??
+            Item(
+                id: "",
+                name: "",
+                photos: [],
+                price: "",
+                expiryDate: "",
+                description: "",
+                tags: [],
+                userId: "",
+                enquiries: {},
+                accommodation: "",
+                kitchenId: "");
 
   @override
   _ListNewItemPageState createState() => _ListNewItemPageState();
@@ -28,23 +42,33 @@ class ListNewItemPage extends StatefulWidget {
 
 class _ListNewItemPageState extends State<ListNewItemPage> {
   final List<File> _images = [];
-  final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _priceController = TextEditingController();
-  final TextEditingController _expiryDateController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
-  final List<String> _selectedTags = [];
+  late TextEditingController _nameController;
+  late TextEditingController _priceController;
+  late TextEditingController _expiryDateController;
+  late TextEditingController _descriptionController;
+  late List<String> _selectedTags;
   String? _userAccommodation;
 
   @override
   void initState() {
     super.initState();
     _loadUserAccommodation();
+    print(widget.item);
+    _nameController = TextEditingController(text: widget.item.name);
+    _priceController = TextEditingController();
+    _expiryDateController = TextEditingController(text: widget.item.expiryDate);
+    _descriptionController =
+        TextEditingController(text: widget.item.description);
+    _selectedTags = widget.item.tags;
   }
 
   Future<void> _loadUserAccommodation() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
-      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
       if (doc.exists) {
         final data = doc.data();
         if (data != null) {
@@ -206,17 +230,18 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
       }
 
       Provider.of<ItemProvider>(context, listen: false).addItem(Item(
-          id: newItem.id,
-          name: _nameController.text,
-          photos: imageUrls,
-          price: _priceController.text,
-          expiryDate: _expiryDateController.text,
-          description: _descriptionController.text,
-          tags: _selectedTags,
-          userId: FirebaseAuth.instance.currentUser!.uid,
-          accommodation: _userAccommodation!,
-          enquiries: {},
-          kitchenId: "",));
+        id: newItem.id,
+        name: _nameController.text,
+        photos: imageUrls,
+        price: _priceController.text,
+        expiryDate: _expiryDateController.text,
+        description: _descriptionController.text,
+        tags: _selectedTags,
+        userId: FirebaseAuth.instance.currentUser!.uid,
+        accommodation: _userAccommodation!,
+        enquiries: {},
+        kitchenId: "",
+      ));
 
       if (mounted) {
         Navigator.pop(context);
@@ -416,36 +441,6 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
                 ),
               ),
               const SizedBox(height: 24),
-              Center(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    // Fetch seller token from the database (this is just a placeholder)
-                    final sellerId =
-                        'SELLER_USER_ID'; // Get the seller's user ID
-                    final sellerDoc = await FirebaseFirestore.instance
-                        .collection('users')
-                        .doc(sellerId)
-                        .get();
-                    if (sellerDoc.exists) {
-                      final sellerToken = sellerDoc.data()?[
-                          'token']; // Assuming token is stored in the 'token' field
-                      if (sellerToken != null) {
-                        _sendEnquiryNotification(sellerToken);
-                      } else {
-                        print('Seller token not found');
-                      }
-                    } else {
-                      print('Seller not found');
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 16, horizontal: 32),
-                    textStyle: const TextStyle(fontSize: 16),
-                  ),
-                  child: const Text('Enquire'),
-                ),
-              ),
             ],
           ),
         ),

@@ -39,7 +39,11 @@ class _FirstPageState extends State<FirstPage> {
         },
         isDarkMode: widget.isDarkMode,
       ),
-      Kitchen(isDarkMode: widget.isDarkMode),
+      Kitchen( onSubmit: () {
+        setState(() {
+          _currentPage = 0; // Navigate to Marketplace page
+        });
+      },isDarkMode: widget.isDarkMode),
       ProfilePage(isDarkMode: widget.isDarkMode),// Add the Kitchen page here
     ]);
   }

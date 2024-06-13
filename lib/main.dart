@@ -138,7 +138,10 @@ class _MyAppState extends State<MyApp> {
                   ),
               '/marketplace': (context) => Marketplace(isDarkMode: _isDarkMode),
               '/profile': (context) => ProfilePage(isDarkMode: _isDarkMode),
-              '/kitchen': (context) => Kitchen(isDarkMode: _isDarkMode),
+              '/kitchen': (context) => Kitchen(onSubmit: () {
+                Navigator.of(context)
+                    .pushReplacementNamed('/marketplace');
+              },isDarkMode: _isDarkMode),
               '/list_new_item': (context) => ListNewItemPage(onSubmit: () {}),
             },
           );

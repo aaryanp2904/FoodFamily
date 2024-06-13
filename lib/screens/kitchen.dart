@@ -4,11 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'add_kitchen_item_page.dart';
 import '../item_model.dart'; // Import Item model
 import 'invite_user_page.dart';
+import 'list_new_item.dart';
 
 class Kitchen extends StatefulWidget {
   final ValueNotifier<bool> isDarkMode;
+  final VoidCallback onSubmit;
 
-  const Kitchen({Key? key, required this.isDarkMode}) : super(key: key);
+  const Kitchen({Key? key, required this.isDarkMode, required this.onSubmit,}) : super(key: key);
 
   @override
   _KitchenState createState() => _KitchenState();
@@ -389,6 +391,24 @@ class _KitchenState extends State<Kitchen> {
                                 maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
                               ),
+                              Center( child: ElevatedButton(onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ListNewItemPage(onSubmit: () {
+                                      widget.onSubmit();
+                                    }, item: item),
+                                  ),
+                                );
+                              }, child: Text("List on Marketplace", style: TextStyle(color: Colors.white),),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color(0xFF520404), // Set the button's background color to red
+                                  elevation: 5,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                                ),))
                             ],
                           ),
                         ),
