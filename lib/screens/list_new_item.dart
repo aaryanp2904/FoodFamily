@@ -58,7 +58,6 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
         } else {
           continueTakingPhotos = false;
         }
-
         continueTakingPhotos = await _showContinueTakingPhotosDialog();
       }
     }
