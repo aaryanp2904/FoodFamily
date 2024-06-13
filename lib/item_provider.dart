@@ -45,30 +45,34 @@ class ItemProvider with ChangeNotifier {
 
   Future<void> fetchItems() async {
     try {
-      final QuerySnapshot snapshot =
-          await FirebaseFirestore.instance.collection('items').get();
       final FirebaseAuth auth = FirebaseAuth.instance;
       final user = auth.currentUser;
       if (user != null) {
-        _marketplaceItems = snapshot.docs.map((doc) {
-          final data = doc.data() as Map<String, dynamic>;
-          return Item(
-            id: doc.id,
-            name: data['name'],
-            photos: List<String>.from(data['images']),
-            price: data['price'],
-            expiryDate: data['expiryDate'],
-            description: data['description'],
-            tags: List<String>.from(data['tags']),
-            userId: data['userId'],
-            enquiries: Map<String, String>.from(data['enquiries'] ?? {}),
-            contactMessage: data['contactMessage'],
-            kitchenId: "",
-            accommodation: data['accommodation']
-          );
-        }).toList();
+        FirebaseFirestore.instance
+            .collection('items')
+            .snapshots()
+            .listen((QuerySnapshot snapshot) {
+          _marketplaceItems.clear(); // Clear existing items
+          _marketplaceItems = snapshot.docs.map((doc) {
+            final data = doc.data() as Map<String, dynamic>;
+            return Item(
+              id: doc.id,
+              name: data['name'],
+              photos: List<String>.from(data['images']),
+              price: data['price'],
+              expiryDate: data['expiryDate'],
+              description: data['description'],
+              tags: List<String>.from(data['tags']),
+              userId: data['userId'],
+              enquiries: Map<String, String>.from(data['enquiries'] ?? {}),
+              contactMessage: data['contactMessage'],
+              kitchenId: "", // Adjust as per your data structure
+              accommodation: data['accommodation'],
+            );
+          }).toList();
+          notifyListeners();
+        });
       }
-      notifyListeners();
     } catch (e) {
       print('Error fetching items: $e');
     }
