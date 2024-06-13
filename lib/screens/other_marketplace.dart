@@ -1,48 +1,27 @@
+// other_marketplace.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_1/screens/map_page.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
-
 import '../item_provider.dart';
 import 'item_detail_page.dart';
-import 'map_page.dart';
 
-class Marketplace extends StatefulWidget {
+class OtherMarketplace extends StatefulWidget {
   final ValueNotifier<bool> isDarkMode;
+  final String accommodation;
 
-  const Marketplace({Key? key, required this.isDarkMode}) : super(key: key);
+  const OtherMarketplace({Key? key, required this.isDarkMode, required this.accommodation}) : super(key: key);
 
   @override
-  _MarketplaceState createState() => _MarketplaceState();
+  _OtherMarketplaceState createState() => _OtherMarketplaceState();
 }
 
-class _MarketplaceState extends State<Marketplace> {
+class _OtherMarketplaceState extends State<OtherMarketplace> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   final List<String> _selectedTags = [];
-  String? _userAccommodation;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUserAccommodation();
-  }
-
-  Future<void> _loadUserAccommodation() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
-      if (doc.exists) {
-        final data = doc.data();
-        if (data != null) {
-          setState(() {
-            _userAccommodation = data['accommodation'];
-          });
-        }
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,27 +30,15 @@ class _MarketplaceState extends State<Marketplace> {
     final filteredItems = items
         .where((item) =>
             item.name.toLowerCase().contains(_searchQuery.toLowerCase()) &&
-            (_selectedTags.isEmpty ||
-                item.tags.any((tag) => _selectedTags.contains(tag))) &&
-            (_userAccommodation == null || item.accommodation == _userAccommodation))
+            (_selectedTags.isEmpty || item.tags.any((tag) => _selectedTags.contains(tag))) &&
+            item.accommodation == widget.accommodation)
         .toList();
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Marketplace'),
+        title: Text('Marketplace for ${widget.accommodation}'),
         centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.map),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const MapPage()),
-              );
-            },
-          ),
-        ],
       ),
       body: ValueListenableBuilder<bool>(
         valueListenable: widget.isDarkMode,

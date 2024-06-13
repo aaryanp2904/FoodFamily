@@ -10,6 +10,7 @@ class Item {
   final List<String> tags;
   final String userId;
   final Map<String, String> enquiries;
+  final String accommodation;
   String? contactMessage; // Make this field mutable
   String kitchenId;
 
@@ -23,6 +24,7 @@ class Item {
     required this.tags,
     required this.userId,
     required this.enquiries,
+    required this.accommodation,
     required this.kitchenId,
     this.contactMessage,
   });
@@ -40,9 +42,11 @@ class Item {
       userId: data['userId'] ?? "",
       enquiries: Map<String, String>.from(data['enquiries'] ?? {}),
       contactMessage: data['contactMessage'],
+      accommodation: data['accommodation'],
       kitchenId: data['kitchenId'],
     );
   }
+
 
   Item copyWith({
     String? id,
@@ -55,6 +59,7 @@ class Item {
     String? userId,
     Map<String, String>? enquiries,
     String? contactMessage,
+    String? accommodation,
   }) {
     return Item(
       id: id ?? this.id,
@@ -67,6 +72,7 @@ class Item {
       userId: userId ?? this.userId,
       enquiries: enquiries ?? this.enquiries,
       contactMessage: contactMessage ?? this.contactMessage,
+      accommodation: accommodation ?? this.accommodation,
       kitchenId: kitchenId,
     );
   }
@@ -82,6 +88,7 @@ class Item {
       'userId': userId,
       'enquiries': enquiries,
       'contactMessage': contactMessage,
+      'accommodation': accommodation,
       'kitchenId': kitchenId,
     };
   }
