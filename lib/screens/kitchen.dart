@@ -151,6 +151,34 @@ class _KitchenState extends State<Kitchen> {
     );
   }
 
+  Future<void> _showMemberEmails() async {
+    final kitchenDoc = await FirebaseFirestore.instance.collection('Kitchens').doc(kitchenId).get();
+    final memberIds = List<String>.from(kitchenDoc['members']);
+    final memberEmails = await Future.wait(memberIds.map((memberId) async {
+      final memberDoc = await FirebaseFirestore.instance.collection('users').doc(memberId).get();
+      return memberDoc['email'];
+    }));
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Kitchen Members'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: memberEmails.map((email) => Text(email)).toList(),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -175,7 +203,15 @@ class _KitchenState extends State<Kitchen> {
         ),
         centerTitle: true,
         toolbarHeight: 80,
+        leading: IconButton(
+          icon: const Icon(Icons.exit_to_app),
+          onPressed: _leaveKitchen,
+        ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.people_alt_rounded),
+            onPressed: _showMemberEmails,
+          ),
           IconButton(
             icon: const Icon(Icons.person_add),
             onPressed: () {
@@ -184,10 +220,6 @@ class _KitchenState extends State<Kitchen> {
                 MaterialPageRoute(builder: (context) => InviteUserPage(kitchenId: kitchenId)),
               );
             },
-          ),
-          IconButton(
-            icon: const Icon(Icons.exit_to_app),
-            onPressed: _leaveKitchen,
           ),
         ],
       ),
@@ -373,9 +405,14 @@ class _KitchenState extends State<Kitchen> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => AddKitchenItemPage(onSubmit: () {
-              setState(() {});
-            }, kitchenId: kitchenId)),
+            MaterialPageRoute(
+              builder: (context) => AddKitchenItemPage(
+                onSubmit: () {
+                  setState(() {});
+                },
+                kitchenId: kitchenId,
+              ),
+            ),
           );
         },
         child: const Icon(Icons.add),
