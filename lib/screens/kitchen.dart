@@ -22,6 +22,7 @@ class _KitchenState extends State<Kitchen> {
   String _searchQuery = '';
   final List<String> _selectedTags = [];
 
+
   late String kitchenId;
   bool _isLoading = true; // Track loading state
 
