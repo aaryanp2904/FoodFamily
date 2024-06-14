@@ -47,6 +47,8 @@ class Item {
     );
   }
 
+  get images => null;
+
 
   Item copyWith({
     String? id,

@@ -190,15 +190,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         });
                       }
                     : null,
-                items: <String>[
-                  'Woodward Buildings',
-                  'Kemp Porter Buildings',
-                  'Eastside Halls',
-                  'Southside Halls',
-                  'Beit Halls',
-                  'Xenia',
-                  'Wilsons House'
-                ].map<DropdownMenuItem<String>>((String value) {
+                items: <String>['Beit Quad', 'Gabor Hall', 'Linstead Hall', 'Wilkinson Hall', 'Kemp Porter Buildings', 'Falmouth Hall', 'Keogh Hall', 'Selkirk Hall', 'Tizard Hall', 'Wilson House', 'Woodward Buildings'].map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
