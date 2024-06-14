@@ -17,6 +17,8 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+bool _isSubmitting = false;
+
 class ListNewItemPage extends StatefulWidget {
   final VoidCallback onSubmit;
   final Item item;
@@ -187,12 +189,17 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
       return;
     }
 
+    setState(() {
+      _isSubmitting = true; // Disable the submit button
+    });
+
     try {
       List<String> imageUrls = [];
+
       for (var image in _images) {
         String fileName = DateTime.now().millisecondsSinceEpoch.toString();
         Reference reference =
-            FirebaseStorage.instance.ref().child('items/$fileName');
+        FirebaseStorage.instance.ref().child('items/$fileName');
         UploadTask uploadTask = reference.putFile(image);
         TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
         if (taskSnapshot.state == TaskState.success) {
@@ -252,6 +259,12 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
       if (mounted) {
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('Failed to list item')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false; // Re-enable the submit button
+        });
       }
     }
   }
@@ -431,7 +444,7 @@ class _ListNewItemPageState extends State<ListNewItemPage> {
               const SizedBox(height: 24),
               Center(
                 child: ElevatedButton(
-                  onPressed: _submitItem,
+                  onPressed: _isSubmitting ? null : _submitItem, // Update this line
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                         vertical: 16, horizontal: 32),

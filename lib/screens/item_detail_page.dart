@@ -122,7 +122,7 @@ class _ItemDetailPageState extends State<ItemDetailPage> with SingleTickerProvid
     if (currentUserName != null) {
       // Add enquiry to the Firestore document
       final DocumentReference itemDoc =
-          FirebaseFirestore.instance.collection('items').doc(widget.item.id);
+      FirebaseFirestore.instance.collection('items').doc(widget.item.id);
 
       await itemDoc.update({
         'enquiries.${currentUserName}': currentUserId,
@@ -133,7 +133,7 @@ class _ItemDetailPageState extends State<ItemDetailPage> with SingleTickerProvid
       setState(() {
         widget.item.enquiries[currentUserName] = currentUserId;
         _enquiryMessage =
-            'Enquiry Successful.\nLook out for a text message from ${sellerName ?? 'the seller'}.';
+        'Enquiry Successful.\nLook out for a text message from ${sellerName ?? 'the seller'}.';
       });
 
       _controller.forward();
@@ -185,21 +185,21 @@ class _ItemDetailPageState extends State<ItemDetailPage> with SingleTickerProvid
       body: ValueListenableBuilder<bool>(
         valueListenable: widget.isDarkMode,
         builder: (context, isDark, child) {
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Text(
-                  'Photo ${_currentPage + 1} of ${widget.item.photos.length}',
-                  style: TextStyle(
-                    fontSize: screenWidth * 0.045,
-                    fontWeight: FontWeight.bold,
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Text(
+                    'Photo ${_currentPage + 1} of ${widget.item.photos.length}',
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.045,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                Expanded(
-                  child: SizedBox(
-                    height: screenWidth * 0.8,
+                  const SizedBox(height: 10),
+                  AspectRatio(
+                    aspectRatio: 1,
                     child: PageView.builder(
                       itemCount: widget.item.photos.length,
                       onPageChanged: (int page) {
@@ -211,141 +211,175 @@ class _ItemDetailPageState extends State<ItemDetailPage> with SingleTickerProvid
                         final photoUrl = widget.item.photos[index];
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Column(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.network(
-                                  photoUrl,
-                                  width: screenWidth * 0.8,
-                                  height: screenWidth * 0.8,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                            ],
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: Image.network(
+                              photoUrl,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         );
                       },
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
+                  const SizedBox(height: 20),
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    elevation: 2,
+                    margin: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                'Name: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: screenWidth * 0.045,
+                                ),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  widget.item.name,
+                                  style: TextStyle(
+                                    fontSize: screenWidth * 0.045,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Text(
+                                'Price: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: screenWidth * 0.045,
+                                ),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  "£${widget.item.price}",
+                                  style: TextStyle(
+                                    fontSize: screenWidth * 0.045,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              Text(
+                                'Expiry Date: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: screenWidth * 0.045,
+                                ),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  widget.item.expiryDate,
+                                  style: TextStyle(
+                                    fontSize: screenWidth * 0.045,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            'Description:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: screenWidth * 0.045,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            widget.item.description,
+                            style: TextStyle(
+                              fontSize: screenWidth * 0.045,
+                              color: Colors.grey[800],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            'Tags:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: screenWidth * 0.045,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 5,
+                            children: widget.item.tags.map((tag) {
+                              return Chip(
+                                label: Text(tag),
+                                backgroundColor: isDark
+                                    ? Colors.grey.shade700
+                                    : Colors.blue.shade100,
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  elevation: 2,
-                  margin: const EdgeInsets.symmetric(vertical: 10.0),
-                  child: Padding(
+                  Container(
+                    width: double.infinity,
                     padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              'Name: ',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: screenWidth * 0.045,
-                              ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                widget.item.name,
-                                style: TextStyle(
-                                  fontSize: screenWidth * 0.045,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                            ),
-                          ],
+                    child: _isEnquirySuccessful || _isEnquiryError
+                        ? FadeTransition(
+                      opacity: _fadeAnimation,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        decoration: BoxDecoration(
+                          color: _isEnquiryError ? Colors.red : Colors.green,
+                          borderRadius: BorderRadius.circular(8.0),
                         ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Text(
-                              'Price: ',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: screenWidth * 0.045,
-                              ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                "£${widget.item.price}",
-                                style: TextStyle(
-                                  fontSize: screenWidth * 0.045,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                            ),
-                          ],
+                        child: Text(
+                          _enquiryMessage,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 20),
-                        Row(
-                          children: [
-                            Text(
-                              'Expiry Date: ',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: screenWidth * 0.045,
-                              ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                widget.item.expiryDate,
-                                style: TextStyle(
-                                  fontSize: screenWidth * 0.045,
-                                  color: Colors.grey[700],
-                                ),
-                              ),
-                            ),
-                          ],
+                      ),
+                    )
+                        : ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
                         ),
-                      ],
+                      ),
+                      onPressed: _handleEnquiry,
+                      child: const Text(
+                        'Enquire',
+                        style: TextStyle(
+                          fontSize: 18.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                if (_userAccommodation != null &&
-                    _accommodationLocations[_userAccommodation!] != null)
-                  ElevatedButton(
-                    onPressed: _openDirections,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20.0, vertical: 10.0),
-                      textStyle: TextStyle(fontSize: screenWidth * 0.045),
-                    ),
-                    child: const Text('Get Directions'),
-                  ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _handleEnquiry,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 20.0, vertical: 10.0),
-                    textStyle: TextStyle(fontSize: screenWidth * 0.045),
-                  ),
-                  child: const Text('Send Enquiry'),
-                ),
-                const SizedBox(height: 20),
-                FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: Text(
-                    _enquiryMessage,
-                    style: TextStyle(
-                      color: _isEnquiryError ? Colors.red : Colors.green,
-                      fontSize: screenWidth * 0.04,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },

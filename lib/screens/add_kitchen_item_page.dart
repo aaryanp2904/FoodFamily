@@ -7,6 +7,8 @@ import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io';
 
+bool _isSubmitting = false;
+
 class AddKitchenItemPage extends StatefulWidget {
   final VoidCallback onSubmit;
   final String kitchenId;
@@ -142,6 +144,10 @@ class _AddKitchenItemPageState extends State<AddKitchenItemPage> {
       return;
     }
 
+    setState(() {
+      _isSubmitting = true; // Disable the submit button
+    });
+
     try {
       List<String> imageUrls = await _uploadImages();
 
@@ -168,6 +174,10 @@ class _AddKitchenItemPageState extends State<AddKitchenItemPage> {
         _showError = true;
         _errorMessage = 'An error occurred while adding the item. Please try again.';
       });
+    }
+
+    finally {
+      _isSubmitting = false;
     }
   }
 
@@ -294,7 +304,7 @@ class _AddKitchenItemPageState extends State<AddKitchenItemPage> {
               const SizedBox(height: 24),
               Center(
                 child: ElevatedButton(
-                  onPressed: _submitItem,
+                  onPressed: _isSubmitting ? null : _submitItem,
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(
                         vertical: 16, horizontal: 32),

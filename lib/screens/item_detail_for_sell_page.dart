@@ -59,21 +59,21 @@ class _ItemDetailForSellPageState extends State<ItemDetailForSellPage> {
       body: ValueListenableBuilder<bool>(
         valueListenable: widget.isDarkMode,
         builder: (context, isDark, child) {
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Text(
-                  'Photo ${_currentPage + 1} of ${widget.item.photos.length}',
-                  style: TextStyle(
-                    fontSize: screenWidth * 0.045,
-                    fontWeight: FontWeight.bold,
+          return SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Text(
+                    'Photo ${_currentPage + 1} of ${widget.item.photos.length}',
+                    style: TextStyle(
+                      fontSize: screenWidth * 0.045,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 10),
-                Expanded(
-                  child: SizedBox(
-                    height: screenWidth * 0.8,
+                  const SizedBox(height: 10),
+                  AspectRatio(
+                    aspectRatio: 1,
                     child: PageView.builder(
                       itemCount: widget.item.photos.length,
                       onPageChanged: (int page) {
@@ -85,192 +85,185 @@ class _ItemDetailForSellPageState extends State<ItemDetailForSellPage> {
                         final photoUrl = widget.item.photos[index];
                         return Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Column(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8.0),
-                                child: Image.network(
-                                  photoUrl,
-                                  width: screenWidth * 0.8,
-                                  height: screenWidth * 0.8,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                            ],
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(8.0),
+                            child: Image.network(
+                              photoUrl,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         );
                       },
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  elevation: 2,
-                  margin: const EdgeInsets.symmetric(vertical: 10.0),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              'Name: ',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: screenWidth * 0.045,
-                              ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                widget.item.name,
+                  const SizedBox(height: 20),
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    elevation: 2,
+                    margin: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                'Name: ',
                                 style: TextStyle(
+                                  fontWeight: FontWeight.bold,
                                   fontSize: screenWidth * 0.045,
-                                  color: Colors.grey[700],
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          children: [
-                            Text(
-                              'Price: ',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: screenWidth * 0.045,
-                              ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                "£${widget.item.price}",
-                                style: TextStyle(
-                                  fontSize: screenWidth * 0.045,
-                                  color: Colors.grey[700],
+                              Expanded(
+                                child: Text(
+                                  widget.item.name,
+                                  style: TextStyle(
+                                    fontSize: screenWidth * 0.045,
+                                    color: Colors.grey[700],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          children: [
-                            Text(
-                              'Expiry Date: ',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: screenWidth * 0.045,
-                              ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                widget.item.expiryDate,
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              Text(
+                                'Price: ',
                                 style: TextStyle(
+                                  fontWeight: FontWeight.bold,
                                   fontSize: screenWidth * 0.045,
-                                  color: Colors.grey[700],
                                 ),
                               ),
+                              Expanded(
+                                child: Text(
+                                  "£${widget.item.price}",
+                                  style: TextStyle(
+                                    fontSize: screenWidth * 0.045,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              Text(
+                                'Expiry Date: ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: screenWidth * 0.045,
+                                ),
+                              ),
+                              Expanded(
+                                child: Text(
+                                  widget.item.expiryDate,
+                                  style: TextStyle(
+                                    fontSize: screenWidth * 0.045,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 20),
+                          Text(
+                            'Description:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: screenWidth * 0.045,
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        Text(
-                          'Description:',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: screenWidth * 0.045,
                           ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          widget.item.description,
-                          style: TextStyle(
-                            fontSize: screenWidth * 0.045,
-                            color: Colors.grey[800],
+                          const SizedBox(height: 10),
+                          Text(
+                            widget.item.description,
+                            style: TextStyle(
+                              fontSize: screenWidth * 0.045,
+                              color: Colors.grey[800],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 20),
-                        Text(
-                          'Tags:',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: screenWidth * 0.045,
+                          const SizedBox(height: 20),
+                          Text(
+                            'Tags:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: screenWidth * 0.045,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 5,
-                          children: widget.item.tags.map((tag) {
-                            return Chip(
-                              label: Text(tag),
-                              backgroundColor: isDark
-                                  ? Colors.grey.shade700
-                                  : Colors.blue.shade100,
-                            );
-                          }).toList(),
-                        ),
-                      ],
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 5,
+                            children: widget.item.tags.map((tag) {
+                              return Chip(
+                                label: Text(tag),
+                                backgroundColor: isDark
+                                    ? Colors.grey.shade700
+                                    : Colors.blue.shade100,
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                const Color.fromARGB(255, 43, 173, 199),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16.0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                              const Color.fromARGB(255, 43, 173, 199),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16.0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
                             ),
-                          ),
-                          onPressed: _removeListing,
-                          child: const Text(
-                            'Remove Listing',
-                            style: TextStyle(
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold,
+                            onPressed: _removeListing,
+                            child: const Text(
+                              'Remove Listing',
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8.0),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16.0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
+                      const SizedBox(width: 8.0),
+                      Expanded(
+                        child: Container(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16.0),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
                             ),
-                          ),
-                          onPressed: _editListing,
-                          child: const Text(
-                            'Edit Listing',
-                            style: TextStyle(
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold,
+                            onPressed: _editListing,
+                            child: const Text(
+                              'Edit Listing',
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           );
         },
