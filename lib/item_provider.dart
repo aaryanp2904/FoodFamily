@@ -109,7 +109,7 @@ class ItemProvider with ChangeNotifier {
 
   void addItem(Item item) {
     _userItems.add(item);
-    _marketplaceItems.add(item);
+    // _marketplaceItems.add(item);
     notifyListeners();
   }
 }
