@@ -45,9 +45,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-    <key>NSCameraUsageDescription</key>
-    <string>This app requires access to the camera to take photos of the items you wish to list.</string>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string>This app requires access to the Photo Library so you can choose photos to upload.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need your location to show the route</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>We need your location to show the route</string>
 </dict>
 </plist>

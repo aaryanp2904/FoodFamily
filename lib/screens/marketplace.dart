@@ -22,6 +22,21 @@ class _MarketplaceState extends State<Marketplace> {
   String _searchQuery = '';
   final List<String> _selectedTags = [];
   String? _userAccommodation;
+  String? _selectedAccommodation;
+
+  final List<String> _accommodations = [
+    'Beit Quad',
+    'Gabor Hall',
+    'Linstead Hall',
+    'Wilkinson Hall',
+    'Kemp Porter Buildings',
+    'Falmouth Hall',
+    'Keogh Hall',
+    'Selkirk Hall',
+    'Tizard Hall',
+    'Wilson House',
+    'Woodward Buildings'
+  ];
 
   @override
   void initState() {
@@ -38,6 +53,7 @@ class _MarketplaceState extends State<Marketplace> {
         if (data != null) {
           setState(() {
             _userAccommodation = data['accommodation'];
+            _selectedAccommodation = _userAccommodation;
           });
         }
       }
@@ -53,7 +69,7 @@ class _MarketplaceState extends State<Marketplace> {
             item.name.toLowerCase().contains(_searchQuery.toLowerCase()) &&
             (_selectedTags.isEmpty ||
                 item.tags.any((tag) => _selectedTags.contains(tag))) &&
-            (_userAccommodation == null || item.accommodation == _userAccommodation))
+            (_selectedAccommodation == null || item.accommodation == _selectedAccommodation))
         .toList();
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -80,20 +96,41 @@ class _MarketplaceState extends State<Marketplace> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(10),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: 'Search by name',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15),
+                child: Column(
+                  children: [
+                    DropdownButton<String>(
+                      isExpanded: true,
+                      value: _selectedAccommodation,
+                      hint: const Text('Select Accommodation'),
+                      items: _accommodations.map((accommodation) {
+                        return DropdownMenuItem<String>(
+                          value: accommodation,
+                          child: Text(accommodation),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedAccommodation = value;
+                        });
+                      },
                     ),
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      _searchQuery = value;
-                    });
-                  },
+                    const SizedBox(height: 10),
+                    TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: 'Search by name',
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value;
+                        });
+                      },
+                    ),
+                  ],
                 ),
               ),
               SizedBox(

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../item_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:location/location.dart';
+import 'directions_page.dart'; // Import the directions page
 
 class ItemDetailPage extends StatefulWidget {
   final Item item;
@@ -20,6 +23,7 @@ class _ItemDetailPageState extends State<ItemDetailPage> with SingleTickerProvid
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   String _enquiryMessage = '';
+  String? _userAccommodation;
 
   @override
   void initState() {
@@ -32,6 +36,22 @@ class _ItemDetailPageState extends State<ItemDetailPage> with SingleTickerProvid
       parent: _controller,
       curve: Curves.easeIn,
     );
+    _loadUserAccommodation();
+  }
+
+  Future<void> _loadUserAccommodation() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      if (doc.exists) {
+        final data = doc.data();
+        if (data != null) {
+          setState(() {
+            _userAccommodation = data['accommodation'];
+          });
+        }
+      }
+    }
   }
 
   Future<String?> getUserNameByItem(Item item) async {
@@ -119,6 +139,36 @@ class _ItemDetailPageState extends State<ItemDetailPage> with SingleTickerProvid
       _controller.forward();
     }
   }
+
+  Future<void> _openDirections() async {
+    final locationData = await Location().getLocation();
+    final destination = _accommodationLocations[widget.item.accommodation];
+    
+    if (destination != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DirectionsPage(
+            destination: destination,
+          ),
+        ),
+      );
+    }
+  }
+
+  final Map<String, LatLng> _accommodationLocations = {
+    'Beit Quad': const LatLng(51.4999578, -0.1786947),
+    'Gabor Hall': const LatLng(51.4994998, -0.1722478),
+    'Linstead Hall': const LatLng(51.499768, -0.1720874),
+    'Wilkinson Hall': const LatLng(51.499629, -0.1720501),
+    'Kemp Porter Buildings': const LatLng(51.5099, -0.2699),
+    'Falmouth Hall': const LatLng(51.4986411, -0.172552),
+    'Keogh Hall': const LatLng(51.4985492, -0.1730125),
+    'Selkirk Hall': const LatLng(51.4985999, -0.1725462),
+    'Tizard Hall': const LatLng(51.4986622, -0.1724472),
+    'Wilson House': const LatLng(51.5169551, -0.1700866),
+    'Woodward Buildings': const LatLng(51.5131, -0.2704),
+  };
 
   @override
   void dispose() {
@@ -254,87 +304,46 @@ class _ItemDetailPageState extends State<ItemDetailPage> with SingleTickerProvid
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
-                        Text(
-                          'Description:',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: screenWidth * 0.045,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          widget.item.description,
-                          style: TextStyle(
-                            fontSize: screenWidth * 0.045,
-                            color: Colors.grey[800],
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        Text(
-                          'Tags:',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: screenWidth * 0.045,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 5,
-                          children: widget.item.tags.map((tag) {
-                            return Chip(
-                              label: Text(tag),
-                              backgroundColor: isDark
-                                  ? Colors.grey.shade700
-                                  : Colors.blue.shade100,
-                            );
-                          }).toList(),
-                        ),
                       ],
                     ),
                   ),
                 ),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(16.0),
-                  child: _isEnquirySuccessful || _isEnquiryError
-                      ? FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 16.0),
-                            decoration: BoxDecoration(
-                              color: _isEnquiryError ? Colors.red : Color.fromARGB(255, 42, 205, 34),
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            child: Text(
-                              _enquiryMessage,
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        )
-                      : ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color.fromARGB(255, 43, 173, 199),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16.0),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                          ),
-                          onPressed: _handleEnquiry,
-                          child: const Text(
-                            'Enquire',
-                            style: TextStyle(
-                              fontSize: 18.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
+                const SizedBox(height: 20),
+                if (_userAccommodation != null &&
+                    _accommodationLocations[_userAccommodation!] != null)
+                  ElevatedButton(
+                    onPressed: _openDirections,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20.0, vertical: 10.0),
+                      textStyle: TextStyle(fontSize: screenWidth * 0.045),
+                    ),
+                    child: const Text('Get Directions'),
+                  ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _handleEnquiry,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 10.0),
+                    textStyle: TextStyle(fontSize: screenWidth * 0.045),
+                  ),
+                  child: const Text('Send Enquiry'),
+                ),
+                const SizedBox(height: 20),
+                FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Text(
+                    _enquiryMessage,
+                    style: TextStyle(
+                      color: _isEnquiryError ? Colors.red : Colors.green,
+                      fontSize: screenWidth * 0.04,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
               ],
             ),
