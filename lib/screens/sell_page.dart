@@ -383,7 +383,7 @@ class _SellPageState extends State<SellPage> {
             ),
           );
         },
-        backgroundColor: Colors.teal,
+        backgroundColor: const Color(0xff309fa9),
         child: const Icon(Icons.add, size: 32),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

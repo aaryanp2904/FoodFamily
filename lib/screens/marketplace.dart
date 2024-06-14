@@ -59,7 +59,7 @@ class _MarketplaceState extends State<Marketplace> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Marketplace'),
+        title: const Text('Marketplace', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),),
         centerTitle: true,
         actions: [
           IconButton(
