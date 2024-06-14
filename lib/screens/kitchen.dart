@@ -10,7 +10,7 @@ class Kitchen extends StatefulWidget {
   final ValueNotifier<bool> isDarkMode;
   final VoidCallback onSubmit;
 
-  const Kitchen({Key? key, required this.isDarkMode, required this.onSubmit,}) : super(key: key);
+  const Kitchen({Key? key, required this.isDarkMode, required this.onSubmit}) : super(key: key);
 
   @override
   _KitchenState createState() => _KitchenState();
@@ -33,7 +33,8 @@ class _KitchenState extends State<Kitchen> {
 
   Future<void> _initializeKitchen() async {
     final user = _auth.currentUser!;
-    final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+    final userDoc =
+    await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
 
     if (userDoc.exists && userDoc.data()!.containsKey('kitchenId')) {
       setState(() {
@@ -41,7 +42,8 @@ class _KitchenState extends State<Kitchen> {
         _isLoading = false;
       });
     } else {
-      final newKitchenRef = FirebaseFirestore.instance.collection('Kitchens').doc();
+      final newKitchenRef =
+      FirebaseFirestore.instance.collection('Kitchens').doc();
       await newKitchenRef.set({
         'kitchenId': newKitchenRef.id,
         'members': [user.uid]
@@ -70,7 +72,8 @@ class _KitchenState extends State<Kitchen> {
       final invitedBy = invitation['invitedBy'];
       final kitchenId = invitation['kitchenId'];
 
-      final invitedByUser = await FirebaseFirestore.instance.collection('users').doc(invitedBy).get();
+      final invitedByUser =
+      await FirebaseFirestore.instance.collection('users').doc(invitedBy).get();
       final invitedByName = invitedByUser['email'];
 
       showDialog(
@@ -128,7 +131,8 @@ class _KitchenState extends State<Kitchen> {
               Navigator.of(context).pop(); // Close the dialog
 
               // Create a new kitchen
-              final newKitchenRef = FirebaseFirestore.instance.collection('Kitchens').doc();
+              final newKitchenRef =
+              FirebaseFirestore.instance.collection('Kitchens').doc();
               await newKitchenRef.set({
                 'kitchenId': newKitchenRef.id,
                 'members': [user.uid]
@@ -154,10 +158,12 @@ class _KitchenState extends State<Kitchen> {
   }
 
   Future<void> _showMemberEmails() async {
-    final kitchenDoc = await FirebaseFirestore.instance.collection('Kitchens').doc(kitchenId).get();
+    final kitchenDoc =
+    await FirebaseFirestore.instance.collection('Kitchens').doc(kitchenId).get();
     final memberIds = List<String>.from(kitchenDoc['members']);
     final memberEmails = await Future.wait(memberIds.map((memberId) async {
-      final memberDoc = await FirebaseFirestore.instance.collection('users').doc(memberId).get();
+      final memberDoc =
+      await FirebaseFirestore.instance.collection('users').doc(memberId).get();
       return memberDoc['email'];
     }));
 
@@ -179,6 +185,26 @@ class _KitchenState extends State<Kitchen> {
         ],
       ),
     );
+  }
+
+  Future<void> _deleteItem(String itemId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('KitchenItems')
+          .doc(itemId)
+          .delete();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Item deleted successfully'),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to delete item: $e'),
+        ),
+      );
+    }
   }
 
   @override
@@ -391,24 +417,44 @@ class _KitchenState extends State<Kitchen> {
                                 maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              Center( child: ElevatedButton(onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ListNewItemPage(onSubmit: () {
-                                      widget.onSubmit();
-                                    }, item: item),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => ListNewItemPage(
+                                            onSubmit: () {
+                                              widget.onSubmit();
+                                            },
+                                            item: item,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Text(
+                                      "List on Marketplace",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Color(0xFF520404),
+                                      elevation: 5,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      padding:
+                                      EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                                    ),
                                   ),
-                                );
-                              }, child: Text("List on Marketplace", style: TextStyle(color: Colors.white),),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Color(0xFF520404), // Set the button's background color to red
-                                  elevation: 5,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(15),
+                                  IconButton(
+                                    icon: Icon(Icons.delete),
+                                    onPressed: () => _deleteItem(item.id),
+                                    color: Colors.red,
                                   ),
-                                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                                ),))
+                                ],
+                              ),
                             ],
                           ),
                         ),

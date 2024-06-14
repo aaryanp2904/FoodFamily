@@ -6,6 +6,7 @@ import 'list_new_item.dart';
 import '../item_provider.dart';
 import '../item_model.dart'; // Import Item model
 import 'package:cloud_firestore/cloud_firestore.dart'; // Add this import
+import 'package:flutter/services.dart'; // Import Clipboard class
 
 class SellPage extends StatefulWidget {
   final VoidCallback onSubmit;
@@ -14,7 +15,6 @@ class SellPage extends StatefulWidget {
   const SellPage({super.key, required this.onSubmit, required this.isDarkMode});
 
   @override
-  // ignore: library_private_types_in_public_api
   _SellPageState createState() => _SellPageState();
 }
 
@@ -49,18 +49,18 @@ class _SellPageState extends State<SellPage> {
 
       // Fetch enquirer's phone number
       final String? enquirerPhoneNumber =
-          await _getEnquirerPhoneNumber(enquirerId);
+      await _getEnquirerPhoneNumber(enquirerId);
 
       if (enquirerPhoneNumber != null) {
         // Empty the enquiries queue
         item.enquiries.clear();
 
         // Set contact message
-        item.contactMessage = 'Contact $enquirerName at $enquirerPhoneNumber';
+        item.contactMessage = 'Contact $enquirerName at +$enquirerPhoneNumber';
 
         // Update Firestore
         final DocumentReference itemDoc =
-            FirebaseFirestore.instance.collection('items').doc(item.id);
+        FirebaseFirestore.instance.collection('items').doc(item.id);
         await itemDoc.update(item.toFirestore());
 
         // Update state to show contact message
@@ -90,7 +90,7 @@ class _SellPageState extends State<SellPage> {
 
       // Update Firestore
       final DocumentReference itemDoc =
-          FirebaseFirestore.instance.collection('items').doc(item.id);
+      FirebaseFirestore.instance.collection('items').doc(item.id);
       await itemDoc.update(item.toFirestore());
 
       // Update state
@@ -128,9 +128,9 @@ class _SellPageState extends State<SellPage> {
     final items = itemProvider.userItems;
     final filteredItems = items
         .where((item) =>
-            item.name.toLowerCase().contains(_searchQuery.toLowerCase()) &&
-            (_selectedTags.isEmpty ||
-                item.tags.any((tag) => _selectedTags.contains(tag))))
+    item.name.toLowerCase().contains(_searchQuery.toLowerCase()) &&
+        (_selectedTags.isEmpty ||
+            item.tags.any((tag) => _selectedTags.contains(tag))))
         .toList();
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -187,21 +187,21 @@ class _SellPageState extends State<SellPage> {
                 'other'
               ]
                   .map((tag) => Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 5),
-                        child: ChoiceChip(
-                          label: Text(tag),
-                          selected: _selectedTags.contains(tag),
-                          onSelected: (selected) {
-                            setState(() {
-                              if (selected) {
-                                _selectedTags.add(tag);
-                              } else {
-                                _selectedTags.remove(tag);
-                              }
-                            });
-                          },
-                        ),
-                      ))
+                padding: const EdgeInsets.symmetric(horizontal: 5),
+                child: ChoiceChip(
+                  label: Text(tag),
+                  selected: _selectedTags.contains(tag),
+                  onSelected: (selected) {
+                    setState(() {
+                      if (selected) {
+                        _selectedTags.add(tag);
+                      } else {
+                        _selectedTags.remove(tag);
+                      }
+                    });
+                  },
+                ),
+              ))
                   .toList(),
             ),
           ),
@@ -278,7 +278,7 @@ class _SellPageState extends State<SellPage> {
                                     const SizedBox(height: 5),
                                     Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
                                           "£${item.price}",
@@ -307,13 +307,33 @@ class _SellPageState extends State<SellPage> {
                                         ),
                                       ),
                                     if (item.contactMessage != null)
-                                      Text(
-                                        item.contactMessage!,
-                                        style: TextStyle(
-                                          fontSize: screenWidth * 0.035,
-                                          color: Colors.green,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              item.contactMessage!,
+                                              style: TextStyle(
+                                                fontSize: screenWidth * 0.035,
+                                                color: Colors.green,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                          IconButton(
+                                            icon: Icon(Icons.copy),
+                                            onPressed: () {
+                                              Clipboard.setData(
+                                                  ClipboardData(
+                                                      text: '${item.contactMessage!
+                                                          .split(' at ')[1]}'));
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(SnackBar(
+                                                content: Text(
+                                                    'Phone number copied to clipboard!'),
+                                              ));
+                                            },
+                                          ),
+                                        ],
                                       ),
                                     if (firstEnquirer != null &&
                                         item.contactMessage == null) ...[
@@ -351,9 +371,9 @@ class _SellPageState extends State<SellPage> {
                                         return Chip(
                                           label: Text(tag),
                                           backgroundColor:
-                                              widget.isDarkMode.value
-                                                  ? Colors.grey.shade700
-                                                  : Colors.blue.shade100,
+                                          widget.isDarkMode.value
+                                              ? Colors.grey.shade700
+                                              : Colors.blue.shade100,
                                         );
                                       }).toList(),
                                     ),
