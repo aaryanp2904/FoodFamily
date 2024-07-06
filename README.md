@@ -1,16 +1,20 @@
-# flutter_1
+# FoodFamily
 
-A new Flutter project.
+A multiplatform mobile app based solution to minimise food wastage in student university accommodations.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+### Marketplace
 
-A few resources to get you started if this is your first Flutter project:
+Students can join the marketplace for their student accommodation. On this marketplace they can find close to expiry items listed by other students at alarmingly low prices.
+If a student is willing to, they can view marketplaces from nearby accommodation using the map feature on the marketplace page.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+When a student finds an item they like they can enquire, in which case the seller receives their enquiry request which they can choose to accept or reject. If accepted, they
+can contact the enquirer, otherwise the next enquirer in the queue is displayed.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### My Kitchen
+
+Students can invite each other to join their "kitchen". The kitchen is a place where students can put items they are willing to share with others, in order to inform them that
+they are free to use it.
+
+<img width="802" alt="Screenshot 2024-07-07 004226" src="https://github.com/aaryanp2904/FoodFamily/assets/64792565/94a22525-09c0-4e50-8fc4-e1775a89c34c">
